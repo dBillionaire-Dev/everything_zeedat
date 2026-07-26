@@ -1,0 +1,316 @@
+import nodemailer from 'nodemailer';
+
+// Initialize Gmail transporter
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_EMAIL,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
+
+export interface CustomOrderEmailData {
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  occasion: string;
+  budgetRange: string;
+  description: string;
+  preferredDeliveryDate?: string;
+  referenceId: string;
+}
+
+// Generate HTML email with form snapshot
+function generateEmailHTML(data: CustomOrderEmailData): string {
+  const budgetLabels: Record<string, string> = {
+    'under-10k': 'Under ₦10,000',
+    '10k-25k': '₦10,000 - ₦25,000',
+    '25k-50k': '₦25,000 - ₦50,000',
+    '50k-plus': '₦50,000+',
+  };
+
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background-color: #faf8f6;
+          margin: 0;
+          padding: 20px;
+        }
+        .container {
+          max-width: 600px;
+          margin: 0 auto;
+          background-color: white;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+          background: linear-gradient(135deg, #d4a5a5 0%, #c4956f 100%);
+          color: white;
+          padding: 30px;
+          text-align: center;
+        }
+        .header h1 {
+          margin: 0;
+          font-size: 28px;
+          font-weight: 600;
+        }
+        .content {
+          padding: 30px;
+          color: #2a2a2a;
+        }
+        .greeting {
+          font-size: 16px;
+          margin-bottom: 20px;
+          line-height: 1.6;
+        }
+        .snapshot {
+          background-color: #f9f7f4;
+          border-left: 4px solid #d4a5a5;
+          padding: 20px;
+          margin: 20px 0;
+          border-radius: 6px;
+        }
+        .snapshot-title {
+          font-weight: 600;
+          color: #d4a5a5;
+          margin-bottom: 15px;
+          font-size: 14px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        .snapshot-item {
+          margin-bottom: 12px;
+          font-size: 14px;
+          line-height: 1.5;
+        }
+        .snapshot-label {
+          font-weight: 600;
+          color: #2a2a2a;
+          display: inline-block;
+          min-width: 120px;
+        }
+        .snapshot-value {
+          color: #666;
+        }
+        .message {
+          background-color: #e8d4d4;
+          padding: 15px;
+          border-radius: 6px;
+          margin: 20px 0;
+          font-size: 14px;
+          line-height: 1.6;
+          color: #2a2a2a;
+        }
+        .cta-section {
+          margin: 25px 0;
+          text-align: center;
+        }
+        .cta-button {
+          display: inline-block;
+          background-color: #d4a5a5;
+          color: white;
+          padding: 12px 30px;
+          border-radius: 6px;
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 14px;
+          margin: 10px 5px;
+        }
+        .footer {
+          background-color: #f9f7f4;
+          padding: 20px;
+          text-align: center;
+          font-size: 12px;
+          color: #8b8b8b;
+          border-top: 1px solid #e8dfd9;
+        }
+        .footer-link {
+          color: #d4a5a5;
+          text-decoration: none;
+        }
+        .reference-id {
+          font-family: monospace;
+          background-color: #faf8f6;
+          padding: 2px 6px;
+          border-radius: 3px;
+          color: #d4a5a5;
+          font-weight: 600;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>💝 We Received Your Request!</h1>
+        </div>
+        <div class="content">
+          <div class="greeting">
+            <p>Hi <strong>${data.customerName}</strong>,</p>
+            <p>Thank you for reaching out to <strong>Gifts by EverythingZeedat</strong>! We're thrilled that you've chosen us to create a special gift.</p>
+          </div>
+
+          <div class="message">
+            <strong>✓ Request Received Successfully</strong>
+            <p style="margin: 10px 0 0 0;">Your custom gift request has been received and logged. Our gift experts are reviewing your details and will get back to you within <strong>24 hours</strong> with personalized recommendations and a quotation.</p>
+          </div>
+
+          <div class="snapshot">
+            <div class="snapshot-title">📋 Request Details Snapshot</div>
+            <div class="snapshot-item">
+              <span class="snapshot-label">Reference ID:</span>
+              <span class="snapshot-value"><span class="reference-id">${data.referenceId}</span></span>
+            </div>
+            <div class="snapshot-item">
+              <span class="snapshot-label">Occasion:</span>
+              <span class="snapshot-value">${data.occasion}</span>
+            </div>
+            <div class="snapshot-item">
+              <span class="snapshot-label">Budget Range:</span>
+              <span class="snapshot-value">${budgetLabels[data.budgetRange] || data.budgetRange}</span>
+            </div>
+            ${data.preferredDeliveryDate ? `
+            <div class="snapshot-item">
+              <span class="snapshot-label">Preferred Delivery:</span>
+              <span class="snapshot-value">${new Date(data.preferredDeliveryDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+            </div>
+            ` : ''}
+            <div class="snapshot-item">
+              <span class="snapshot-label">Description:</span>
+              <span class="snapshot-value" style="display: block; margin-top: 5px;">"${data.description}"</span>
+            </div>
+          </div>
+
+          <div class="cta-section">
+            <p style="margin: 0 0 15px 0; font-size: 14px; color: #666;">
+              Need to reach us faster? Connect via WhatsApp:
+            </p>
+            <a href="https://wa.me/2348131288947?text=Hi%20Zeedat%2C%20I%20submitted%20a%20custom%20order%20request%20with%20ID%3A%20${data.referenceId}" class="cta-button" style="background-color: #25d366;">
+              💬 Message us on WhatsApp
+            </a>
+          </div>
+
+          <p style="font-size: 13px; color: #8b8b8b; line-height: 1.6;">
+            <strong>What happens next?</strong><br>
+            Our team will review your custom order request and reach out within 24 hours via email or WhatsApp. We'll provide detailed recommendations, pricing, and availability based on your preferences.
+          </p>
+        </div>
+        <div class="footer">
+          <p style="margin: 0 0 10px 0;">
+            <strong>Gifts by EverythingZeedat</strong>
+          </p>
+          <p style="margin: 0 0 10px 0;">
+            📱 WhatsApp: <a href="https://wa.me/2348131288947" class="footer-link">+234 813 128 8947</a><br>
+            📷 Instagram: <a href="https://instagram.com/gifts.by.everythingzeedat" class="footer-link">@gifts.by.everythingzeedat</a>
+          </p>
+          <p style="margin: 0; font-size: 11px;">
+            This is an automated email. Please do not reply to this email. Use WhatsApp for inquiries.
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+}
+
+export async function sendCustomOrderConfirmation(data: CustomOrderEmailData): Promise<boolean> {
+  try {
+    // Send email to customer
+    await transporter.sendMail({
+      from: process.env.GMAIL_EMAIL,
+      to: data.customerEmail,
+      subject: `Custom Gift Request Received - Reference: ${data.referenceId}`,
+      html: generateEmailHTML(data),
+    });
+
+    console.log(`[v0] Email sent successfully to ${data.customerEmail} for reference ${data.referenceId}`);
+    return true;
+  } catch (error) {
+    console.error('[v0] Email sending failed:', error);
+    throw error;
+  }
+}
+
+export async function sendCustomOrderNotificationToAdmin(data: CustomOrderEmailData): Promise<boolean> {
+  try {
+    // Send notification to admin
+    const adminEmail = process.env.GMAIL_EMAIL; // Using same email for admin notification
+    
+    const adminEmailHTML = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: Arial, sans-serif; background-color: #faf8f6; }
+          .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+          .header { background: #d4a5a5; color: white; padding: 15px; text-align: center; }
+          .content { padding: 20px; }
+          .detail { margin: 10px 0; padding: 10px; background: #f9f7f4; }
+          .label { font-weight: bold; color: #2a2a2a; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h2>🎁 New Custom Order Request</h2>
+          </div>
+          <div class="content">
+            <p><strong>Reference ID:</strong> ${data.referenceId}</p>
+            <div class="detail">
+              <p class="label">Customer Name:</p>
+              <p>${data.customerName}</p>
+            </div>
+            <div class="detail">
+              <p class="label">Contact Email:</p>
+              <p>${data.customerEmail}</p>
+            </div>
+            <div class="detail">
+              <p class="label">WhatsApp:</p>
+              <p><a href="https://wa.me/${data.customerPhone.replace(/\D/g, '')}">${data.customerPhone}</a></p>
+            </div>
+            <div class="detail">
+              <p class="label">Occasion:</p>
+              <p>${data.occasion}</p>
+            </div>
+            <div class="detail">
+              <p class="label">Budget Range:</p>
+              <p>${data.budgetRange}</p>
+            </div>
+            <div class="detail">
+              <p class="label">Preferred Delivery Date:</p>
+              <p>${data.preferredDeliveryDate || 'Not specified'}</p>
+            </div>
+            <div class="detail">
+              <p class="label">Description:</p>
+              <p>${data.description}</p>
+            </div>
+            <p style="margin-top: 20px; font-size: 12px; color: #666;">
+              Respond to customer within 24 hours.
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    await transporter.sendMail({
+      from: process.env.GMAIL_EMAIL,
+      to: adminEmail,
+      subject: `[ADMIN] New Custom Order: ${data.customerName} - ${data.referenceId}`,
+      html: adminEmailHTML,
+    });
+
+    console.log(`[v0] Admin notification sent for reference ${data.referenceId}`);
+    return true;
+  } catch (error) {
+    console.error('[v0] Admin notification failed:', error);
+    throw error;
+  }
+}
