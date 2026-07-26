@@ -4,7 +4,7 @@ A complete, production-ready e-commerce platform for a premium personalized gift
 
 ![Homepage Preview](/docs/screenshots/homepage.png)
 
-## 🎁 Features at a Glance
+## Features at a Glance
 
 ### Customer Features
 - **Browse & Shop** - Explore 12+ curated gift products across categories (Hampers, Gift Boxes, Accessories)
@@ -27,7 +27,7 @@ A complete, production-ready e-commerce platform for a premium personalized gift
 - **Products Dashboard** - Manage inventory and product catalog
 - **Status Tracking** - Monitor orders through full lifecycle
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js 18+
@@ -75,7 +75,7 @@ git push origin main
 
 See **QUICKSTART.md** for detailed setup instructions.
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 /app
@@ -119,7 +119,7 @@ See **QUICKSTART.md** for detailed setup instructions.
   └── globals.css                # Tailwind + design tokens
 ```
 
-## 💾 Database Schema
+## Database Schema
 
 ### Products Table
 ```sql
@@ -180,7 +180,7 @@ See **QUICKSTART.md** for detailed setup instructions.
 - created_at, updated_at (timestamps)
 ```
 
-## 🎨 Design System
+## Design System
 
 ### Colors
 - **Primary:** Blush Pink (#d4a5a5)
@@ -200,7 +200,7 @@ See **QUICKSTART.md** for detailed setup instructions.
 - Mobile-first responsive layout
 - WCAG-compliant contrast ratios
 
-## 📧 Automated Notifications (⭐ NEW)
+## Automated Notifications (NEW)
 
 ### Customer Flow
 1. Customer submits custom order form
@@ -231,7 +231,7 @@ See **QUICKSTART.md** for detailed setup instructions.
 
 **See NOTIFICATIONS.md for detailed documentation.**
 
-## 🔐 Security
+## Security
 
 - **Row Level Security (RLS)** on all Supabase tables
 - **App Password Authentication** (not regular Gmail password)
@@ -240,7 +240,7 @@ See **QUICKSTART.md** for detailed setup instructions.
 - **CORS** configured correctly
 - **Rate Limiting** ready to implement
 
-## 🚢 Deployment
+## Deployment
 
 ### Vercel (Recommended)
 ```bash
@@ -258,7 +258,7 @@ GMAIL_EMAIL=your-email@gmail.com
 GMAIL_APP_PASSWORD=16-character-password
 ```
 
-## 📊 Analytics & Monitoring
+## Analytics & Monitoring
 
 ### Key Metrics to Track
 - Email delivery rate
@@ -273,7 +273,7 @@ GMAIL_APP_PASSWORD=16-character-password
 - Gmail inbox for alerts
 - Order status tracking
 
-## 🔄 API Endpoints
+## API Endpoints
 
 ### Public Endpoints
 - `GET /api/products` - List products
@@ -286,7 +286,7 @@ GMAIL_APP_PASSWORD=16-character-password
 - `PATCH /api/custom-orders/[id]` - Update custom order
 - `DELETE /api/orders/[id]` - Cancel order
 
-## 📱 Mobile Experience
+## Mobile Experience
 
 - Fully responsive design (tested on mobile, tablet, desktop)
 - Touch-friendly buttons and interactions
@@ -294,7 +294,7 @@ GMAIL_APP_PASSWORD=16-character-password
 - Optimized images
 - Mobile-first navigation
 
-## ⚡ Performance
+## Performance
 
 - **Lighthouse Score:** 90+
 - **First Contentful Paint:** <1.5s
@@ -302,7 +302,7 @@ GMAIL_APP_PASSWORD=16-character-password
 - **Image Optimization:** Next.js Image component
 - **Caching:** Optimized for Vercel CDN
 
-## 🧪 Testing
+## Testing
 
 ### Manual Testing
 - Test form submissions
@@ -317,7 +317,7 @@ GMAIL_APP_PASSWORD=16-character-password
 - E2E tests with Playwright/Cypress
 - API endpoint tests
 
-## 🎯 Roadmap
+## Roadmap
 
 ### Phase 1 ✅ (Current)
 - [x] Product browsing and cart
@@ -340,7 +340,7 @@ GMAIL_APP_PASSWORD=16-character-password
 - [ ] Discount codes
 - [ ] Analytics dashboard
 
-## 📖 Documentation
+## Documentation
 
 - **QUICKSTART.md** - 5-minute setup guide
 - **EMAIL_SETUP.md** - Gmail configuration guide
@@ -348,7 +348,7 @@ GMAIL_APP_PASSWORD=16-character-password
 - **PROJECT_SUMMARY.md** - Complete feature overview
 - Code comments throughout for implementation details
 
-## 🤝 Contributing
+## Contributing
 
 1. Create feature branch
 2. Make changes
@@ -356,16 +356,16 @@ GMAIL_APP_PASSWORD=16-character-password
 4. Submit pull request
 5. Deploy to Vercel
 
-## 📞 Support
+## Support
 
 - Email: nezerekunke.dev@gmail.com
 - WhatsApp: +234 813 439 4836
 
-## 📄 License
+## License
 
 Private - All rights reserved by The NexDev
 
-## 🙏 Credits
+## Credits
 
 Built with:
 - [Next.js 16](https://nextjs.org)
