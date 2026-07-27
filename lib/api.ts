@@ -126,7 +126,7 @@ export const api = {
     async create(order: Omit<Order, 'id' | 'reference' | 'created_at' | 'updated_at'>) {
       const supabase = createClient();
       const reference = generateOrderReference();
-      
+
       const { data, error } = await supabase
         .from('orders')
         .insert([{ ...order, reference }])
@@ -155,14 +155,16 @@ export const api = {
 
     async getByReference(reference: string) {
       const supabase = createClient();
+      // Public order-tracking now goes through a security-definer RPC rather
+      // than a direct table SELECT, since orders.select is admin-only under
+      // RLS. See scripts/002_admin_auth_and_security.sql.
       const { data, error } = await supabase
-        .from('orders')
-        .select('*, order_items(*)')
-        .eq('reference', reference)
-        .single();
+        .rpc('get_order_by_reference', { p_reference: reference })
+        .maybeSingle();
 
       if (error) throw error;
-      return data as Order;
+      if (!data) throw new Error('Order not found');
+      return data as unknown as Order;
     },
 
     async list() {
