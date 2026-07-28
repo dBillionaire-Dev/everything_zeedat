@@ -314,3 +314,180 @@ export async function sendCustomOrderNotificationToAdmin(data: CustomOrderEmailD
     throw error;
   }
 }
+
+// ============================================================================
+// Regular cart/checkout order emails (guest orders, no account required)
+// ============================================================================
+
+export interface OrderEmailItem {
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+export interface OrderEmailData {
+  customerName: string;
+  customerEmail?: string | null;
+  customerPhone: string;
+  reference: string;
+  orderDate: string;
+  items: OrderEmailItem[];
+  subtotal: number;
+  deliveryFee: number;
+  total: number;
+  deliveryAddress: string;
+  city: string;
+  state: string;
+  deliveryDate: string;
+  notes?: string | null;
+}
+
+function formatNaira(amount: number): string {
+  return `₦${amount.toLocaleString()}`;
+}
+
+function orderItemsHTML(items: OrderEmailItem[]): string {
+  return items
+    .map(
+      item => `
+        <div class="snapshot-item">
+          <span class="snapshot-value">${item.name} × ${item.quantity} — ${formatNaira(item.price * item.quantity)}</span>
+        </div>`
+    )
+    .join('');
+}
+
+export async function sendOrderConfirmation(data: OrderEmailData): Promise<boolean> {
+  if (!data.customerEmail) return false;
+
+  try {
+    const html = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #faf8f6; margin: 0; padding: 20px; }
+          .container { max-width: 600px; margin: 0 auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+          .header { background: linear-gradient(135deg, #d4a5a5 0%, #c4956f 100%); color: white; padding: 30px; text-align: center; }
+          .header h1 { margin: 0; font-size: 26px; font-weight: 600; }
+          .content { padding: 30px; color: #2a2a2a; }
+          .snapshot { background-color: #f9f7f4; border-left: 4px solid #d4a5a5; padding: 20px; margin: 20px 0; border-radius: 6px; }
+          .snapshot-title { font-weight: 600; color: #d4a5a5; margin-bottom: 15px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+          .snapshot-item { margin-bottom: 10px; font-size: 14px; line-height: 1.5; }
+          .totals { margin-top: 15px; padding-top: 15px; border-top: 1px solid #e8dfd9; font-size: 14px; }
+          .total-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+          .cta-button { display: inline-block; background-color: #25d366; color: white; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; }
+          .footer { background-color: #f9f7f4; padding: 20px; text-align: center; font-size: 12px; color: #8b8b8b; border-top: 1px solid #e8dfd9; }
+          .footer-link { color: #d4a5a5; text-decoration: none; }
+          .reference-id { font-family: monospace; background-color: #faf8f6; padding: 2px 6px; border-radius: 3px; color: #d4a5a5; font-weight: 600; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header"><h1>🎁 Order Received!</h1></div>
+          <div class="content">
+            <p>Hi <strong>${data.customerName}</strong>,</p>
+            <p>Thank you so much for shopping with <strong>Gifts by EverythingZeedat</strong>! 💕 We've received your order and here's a summary for your records.</p>
+
+            <div class="snapshot">
+              <div class="snapshot-title">📋 Order ${`<span class="reference-id">${data.reference}</span>`}</div>
+              <p style="font-size: 13px; color: #8b8b8b; margin: -5px 0 15px 0;">Placed on ${new Date(data.orderDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              ${orderItemsHTML(data.items)}
+              <div class="totals">
+                <div class="total-row"><span>Subtotal</span><span>${formatNaira(data.subtotal)}</span></div>
+                <div class="total-row"><span>Delivery</span><span>${formatNaira(data.deliveryFee)}</span></div>
+                <div class="total-row"><strong>Total</strong><strong>${formatNaira(data.total)}</strong></div>
+              </div>
+            </div>
+
+            <p style="font-size: 14px;">Delivering to: ${data.deliveryAddress}, ${data.city}, ${data.state} on ${new Date(data.deliveryDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}.</p>
+
+            <div style="text-align: center; margin: 25px 0;">
+              <p style="margin: 0 0 15px 0; font-size: 14px; color: #666;">Confirm your order and payment details on WhatsApp:</p>
+              <a href="https://wa.me/2348131288947?text=${encodeURIComponent(`Hi Zeedat, I placed an order — Reference: ${data.reference}`)}" class="cta-button">💬 Confirm on WhatsApp</a>
+            </div>
+
+            <p style="font-size: 13px; color: #8b8b8b;">You can track your order any time using your reference number and phone number at any point on our site's Order Tracking page.</p>
+          </div>
+          <div class="footer">
+            <p style="margin: 0 0 10px 0;"><strong>Gifts by EverythingZeedat</strong></p>
+            <p style="margin: 0;">📱 WhatsApp: <a href="https://wa.me/2348131288947" class="footer-link">+234 813 128 8947</a> · 📷 <a href="https://instagram.com/gifts.by.everythingzeedat" class="footer-link">@gifts.by.everythingzeedat</a></p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    await transporter.sendMail({
+      from: process.env.GMAIL_EMAIL,
+      to: data.customerEmail,
+      subject: `Order Received - Reference: ${data.reference}`,
+      html,
+    });
+
+    console.log(`[v0] Order confirmation email sent for ${data.reference}`);
+    return true;
+  } catch (error) {
+    console.error('[v0] Order confirmation email failed:', error);
+    // Don't let a flaky email provider fail the whole order — the order is
+    // already saved in the database at this point.
+    return false;
+  }
+}
+
+export async function sendOrderNotificationToAdmin(data: OrderEmailData): Promise<boolean> {
+  try {
+    const adminEmail = process.env.GMAIL_EMAIL;
+
+    const itemsRows = data.items
+      .map(item => `<div class="detail"><p>${item.name} × ${item.quantity} — ${formatNaira(item.price * item.quantity)}</p></div>`)
+      .join('');
+
+    const html = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: Arial, sans-serif; background-color: #faf8f6; }
+          .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+          .header { background: #d4a5a5; color: white; padding: 15px; text-align: center; }
+          .content { padding: 20px; }
+          .detail { margin: 10px 0; padding: 10px; background: #f9f7f4; }
+          .label { font-weight: bold; color: #2a2a2a; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header"><h2>🛍️ New Order</h2></div>
+          <div class="content">
+            <p><strong>Reference:</strong> ${data.reference}</p>
+            <div class="detail"><p class="label">Customer:</p><p>${data.customerName}</p></div>
+            <div class="detail"><p class="label">WhatsApp:</p><p><a href="https://wa.me/${data.customerPhone.replace(/\D/g, '')}">${data.customerPhone}</a></p></div>
+            ${data.customerEmail ? `<div class="detail"><p class="label">Email:</p><p>${data.customerEmail}</p></div>` : ''}
+            <div class="detail"><p class="label">Delivery:</p><p>${data.deliveryAddress}, ${data.city}, ${data.state} — ${new Date(data.deliveryDate).toLocaleDateString()}</p></div>
+            ${data.notes ? `<div class="detail"><p class="label">Notes:</p><p>${data.notes}</p></div>` : ''}
+            <div class="detail"><p class="label">Items:</p>${itemsRows}</div>
+            <div class="detail"><p class="label">Total:</p><p>${formatNaira(data.total)} (subtotal ${formatNaira(data.subtotal)} + delivery ${formatNaira(data.deliveryFee)})</p></div>
+            <p style="margin-top: 20px; font-size: 12px; color: #666;">Reach out to confirm payment and delivery details.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    await transporter.sendMail({
+      from: process.env.GMAIL_EMAIL,
+      to: adminEmail,
+      subject: `[ADMIN] New Order: ${data.customerName} - ${data.reference}`,
+      html,
+    });
+
+    console.log(`[v0] Admin order notification sent for ${data.reference}`);
+    return true;
+  } catch (error) {
+    console.error('[v0] Admin order notification failed:', error);
+    return false;
+  }
+}

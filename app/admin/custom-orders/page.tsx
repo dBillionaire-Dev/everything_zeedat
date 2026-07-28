@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, MessageCircle } from 'lucide-react'
+import { ArrowLeft, MessageCircle, Trash2 } from 'lucide-react'
 import { api } from '@/lib/api'
 import type { CustomOrderRequest } from '@/lib/api'
 
@@ -19,6 +19,8 @@ export default function AdminCustomOrdersPage() {
   const [loading, setLoading] = useState(true)
   const [selectedRequest, setSelectedRequest] = useState<CustomOrderRequest | null>(null)
   const [adminNotes, setAdminNotes] = useState('')
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -59,6 +61,22 @@ export default function AdminCustomOrdersPage() {
     }
   }
 
+  const handleDelete = async (id: string) => {
+    setDeleting(true)
+    try {
+      await api.customOrders.remove(id)
+      setRequests(prev => prev.filter(r => r.id !== id))
+      if (selectedRequest?.id === id) {
+        setSelectedRequest(null)
+      }
+    } catch (error) {
+      console.error('[v0] Error deleting request:', error)
+    } finally {
+      setDeleting(false)
+      setConfirmingDelete(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#f9f7f4]">
       {/* Header */}
@@ -94,6 +112,7 @@ export default function AdminCustomOrdersPage() {
                     onClick={() => {
                       setSelectedRequest(request)
                       setAdminNotes(request.admin_notes || '')
+                      setConfirmingDelete(false)
                     }}
                     className={`bg-white rounded-lg border p-4 cursor-pointer transition-colors ${
                       selectedRequest?.id === request.id
@@ -159,9 +178,10 @@ export default function AdminCustomOrdersPage() {
                   <div>
                     <p className="text-xs text-[#8b8b8b] uppercase mb-1">Status</p>
                     <select
+                          style={{ colorScheme: 'light' }}
                       value={selectedRequest.status}
                       onChange={(e) => handleStatusChange(selectedRequest.id, e.target.value as CustomOrderRequest['status'])}
-                      className="w-full px-3 py-2 border border-[#e8dfd9] rounded text-sm focus:outline-none focus:border-[#d4a5a5]"
+                      className="w-full px-3 py-2 border border-[#e8dfd9] rounded text-sm focus:outline-none focus:border-[#d4a5a5] text-[#2a2a2a] bg-white"
                     >
                       <option value="NEW">New</option>
                       <option value="REVIEWED">Reviewed</option>
@@ -188,6 +208,34 @@ export default function AdminCustomOrdersPage() {
                       rows={4}
                       className="w-full px-3 py-2 border border-[#e8dfd9] rounded text-sm focus:outline-none focus:border-[#d4a5a5] resize-none"
                     />
+                  </div>
+
+                  <div className="pt-2 border-t border-[#e8dfd9]">
+                    {confirmingDelete ? (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleDelete(selectedRequest.id)}
+                          disabled={deleting}
+                          className="flex-1 text-sm px-3 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+                        >
+                          {deleting ? 'Deleting...' : 'Confirm Delete'}
+                        </button>
+                        <button
+                          onClick={() => setConfirmingDelete(false)}
+                          className="text-sm px-3 py-2 rounded-lg text-[#8b8b8b] hover:bg-[#f9f7f4]"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmingDelete(true)}
+                        className="flex items-center gap-2 text-sm text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Delete Request
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

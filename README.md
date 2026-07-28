@@ -2,7 +2,7 @@
 
 A complete, production-ready e-commerce platform for a premium personalized gift business built with Next.js 16, Supabase, and automated email/WhatsApp notifications.
 
-![Homepage Preview](/docs/screenshots/homepage.png)
+![Homepage Preview](/og-image.png)
 
 ## Features at a Glance
 
@@ -14,7 +14,7 @@ A complete, production-ready e-commerce platform for a premium personalized gift
 - **Order Tracking** - Track orders by reference ID in real-time
 - **Mobile Responsive** - Seamless experience on all devices
 
-### Automation Features ⭐
+### Automation Features
 - **Email Confirmations** - Beautiful HTML emails sent automatically to customers
 - **Admin Notifications** - Instant alerts for new custom orders
 - **Reference IDs** - Unique tracking IDs for all orders
@@ -85,25 +85,25 @@ See **QUICKSTART.md** for detailed setup instructions.
   │   └── [slug]/page.tsx         # Product detail
   ├── cart/page.tsx              # Shopping cart
   ├── checkout/page.tsx          # Checkout flow
-  ├── custom-orders/page.tsx      # Custom order form ⭐
+  ├── custom-orders/page.tsx      # Custom order form
   ├── order-tracking/[ref]/       # Order tracking
   ├── about/page.tsx             # About page
   ├── contact/page.tsx           # Contact page
   ├── admin/
   │   ├── page.tsx               # Admin dashboard
   │   ├── orders/page.tsx        # Orders management
-  │   ├── custom-orders/page.tsx # Custom requests ⭐
+  │   ├── custom-orders/page.tsx # Custom requests
   │   └── products/page.tsx      # Products management
   ├── api/
-  │   └── custom-orders/route.ts # Order submission API ⭐
+  │   └── custom-orders/route.ts # Order submission API
   ├── layout.tsx
   └── globals.css
 
 /lib
   ├── api.ts                     # Supabase client
   ├── cart-context.tsx           # Cart state management
-  ├── email-service.ts           # Gmail SMTP ⭐
-  ├── whatsapp-service.ts        # WhatsApp messages ⭐
+  ├── email-service.ts           # Gmail SMTP
+  ├── whatsapp-service.ts        # WhatsApp messages
   └── supabase/
       ├── client.ts
       ├── server.ts
@@ -319,7 +319,7 @@ GMAIL_APP_PASSWORD=16-character-password
 
 ## Roadmap
 
-### Phase 1 ✅ (Current)
+### Phase 1 (Current)
 - [x] Product browsing and cart
 - [x] Custom order requests
 - [x] Automated email notifications
@@ -327,9 +327,9 @@ GMAIL_APP_PASSWORD=16-character-password
 - [x] Order tracking
 
 ### Phase 2 (Planned)
-- [ ] Supabase auth for admin login
+- [x] Supabase auth for admin login
 - [ ] Paystack payment processing
-- [ ] Image uploads
+- [x] Image uploads
 - [ ] Customer accounts
 - [ ] Order history
 
@@ -376,8 +376,8 @@ Built with:
 
 ---
 
-**Status:** Production Ready ✅  
+**Status:** Production Ready
 **Last Updated:** July 2026  
 **Version:** 1.0.0
 
-**Ready to take orders!** 🎁
+**Ready to take orders!**

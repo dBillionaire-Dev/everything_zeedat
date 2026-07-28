@@ -75,3 +75,69 @@ ${data.preferredDeliveryDate ? `Preferred Delivery: ${new Date(data.preferredDel
 
   return message;
 }
+
+// ============================================================================
+// Regular cart/checkout order WhatsApp messages
+// ============================================================================
+
+export interface OrderWhatsAppItem {
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+export interface OrderWhatsAppMessageData {
+  customerName: string;
+  customerPhone: string;
+  reference: string;
+  items: OrderWhatsAppItem[];
+  total: number;
+  deliveryDate: string;
+}
+
+function formatItemsList(items: OrderWhatsAppItem[]): string {
+  return items.map(item => `- ${item.name} x${item.quantity} (₦${(item.price * item.quantity).toLocaleString()})`).join('\n');
+}
+
+/**
+ * The message a *customer* is handed to send to Zeedat's WhatsApp after
+ * placing an order — this is what "leads them to WhatsApp with a
+ * customized message" after checkout.
+ */
+export function generateCustomerOrderWhatsAppMessage(data: OrderWhatsAppMessageData): string {
+  return `
+Hi Zeedat! I just placed an order on the website.
+
+*Reference:* ${data.reference}
+*Name:* ${data.customerName}
+
+*Items:*
+${formatItemsList(data.items)}
+
+*Total:* ₦${data.total.toLocaleString()}
+*Delivery Date:* ${new Date(data.deliveryDate).toLocaleDateString()}
+
+Looking forward to confirming payment and details with you! 💝
+`.trim();
+}
+
+export function generateCustomerOrderWhatsAppLink(data: OrderWhatsAppMessageData): string {
+  return generateWhatsAppLink('2348131288947', generateCustomerOrderWhatsAppMessage(data));
+}
+
+/** Internal message logged for admin visibility (mirrors the custom-order pattern). */
+export function generateAdminOrderWhatsAppMessage(data: OrderWhatsAppMessageData): string {
+  return `
+*NEW ORDER*
+
+Customer: ${data.customerName}
+Phone: ${data.customerPhone}
+Reference: ${data.reference}
+
+Items:
+${formatItemsList(data.items)}
+
+Total: ₦${data.total.toLocaleString()}
+Delivery Date: ${new Date(data.deliveryDate).toLocaleDateString()}
+`.trim();
+}

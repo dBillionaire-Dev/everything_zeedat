@@ -1,11 +1,19 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState } from 'react'
 import { ShoppingCart, Menu, X, Heart } from 'lucide-react'
+import { useCart } from '@/lib/cart-context'
+import { useWishlist } from '@/lib/wishlist-context'
 
 export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { items: cartItems } = useCart()
+  const { items: wishlistItems } = useWishlist()
+
+  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
+  const wishlistCount = wishlistItems.length
 
   const links = [
     { href: '/shop', label: 'Shop' },
@@ -19,7 +27,13 @@ export default function Navigation() {
       <nav className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full" style={{ backgroundColor: '#d4a5a5' }} />
+          <Image
+            src="/logo.png"
+            alt="Zeedat Gifts"
+            width={35}
+            height={35}
+            className="rounded-full"
+          />
           <span className="font-serif text-xl font-semibold text-[#2a2a2a] hidden sm:inline">
             Zeedat Gifts
           </span>
@@ -40,14 +54,21 @@ export default function Navigation() {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-3">
-          <button className="p-2 hover:bg-[#e8d4d4] rounded-lg transition-colors">
+          <Link href="/wishlist" className="p-2 hover:bg-[#e8d4d4] rounded-lg transition-colors relative">
             <Heart className="w-5 h-5 text-[#d4a5a5]" />
-          </button>
+            {wishlistCount > 0 && (
+              <span className="absolute top-0 right-0 bg-[#d4a5a5] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                {wishlistCount}
+              </span>
+            )}
+          </Link>
           <Link href="/cart" className="p-2 hover:bg-[#e8d4d4] rounded-lg transition-colors relative">
             <ShoppingCart className="w-5 h-5 text-[#d4a5a5]" />
-            <span className="absolute top-0 right-0 bg-[#d4a5a5] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              0
-            </span>
+            {cartCount > 0 && (
+              <span className="absolute top-0 right-0 bg-[#d4a5a5] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
           </Link>
 
           {/* Mobile Menu Button */}

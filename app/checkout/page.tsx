@@ -1,17 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, AlertCircle } from 'lucide-react'
+import { AlertCircle, MessageCircle, PackageCheck } from 'lucide-react'
 import { useCart } from '@/lib/cart-context'
-import { api } from '@/lib/api'
 
 export default function CheckoutPage() {
-  const router = useRouter()
   const { items, total, clear } = useCart()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [orderResult, setOrderResult] = useState<{ reference: string; whatsappLink: string } | null>(null)
 
   const deliveryFee = 2000
   const grandTotal = total + deliveryFee
@@ -25,10 +23,9 @@ export default function CheckoutPage() {
     state: '',
     deliveryDate: '',
     notes: '',
-    paymentMethod: 'WHATSAPP_MANUAL' as const,
   })
 
-  if (items.length === 0) {
+  if (items.length === 0 && !orderResult) {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center">
         <p className="text-[#8b8b8b] mb-4">Your cart is empty</p>
@@ -50,38 +47,75 @@ export default function CheckoutPage() {
     setLoading(true)
 
     try {
-      const orderData = {
-        customerName: formData.customerName,
-        phone: formData.phone,
-        email: formData.email,
-        deliveryAddress: formData.deliveryAddress,
-        city: formData.city,
-        state: formData.state,
-        deliveryDate: formData.deliveryDate,
-        notes: formData.notes,
-        subtotal: total,
-        deliveryFee,
-        total: grandTotal,
-        paymentMethod: formData.paymentMethod,
-        items: items.map(item => ({
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          customization: item.customization,
-        })),
-      }
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerName: formData.customerName,
+          phone: formData.phone,
+          email: formData.email,
+          deliveryAddress: formData.deliveryAddress,
+          city: formData.city,
+          state: formData.state,
+          deliveryDate: formData.deliveryDate,
+          notes: formData.notes,
+          subtotal: total,
+          deliveryFee,
+          total: grandTotal,
+          items: items.map(item => ({
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            customization: item.customization,
+          })),
+        }),
+      })
 
-      const order = await api.orders.create(orderData)
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Failed to place order')
+
       clear()
-
-      // Redirect to order confirmation
-      router.push(`/order-tracking/${order.reference}`)
+      setOrderResult({ reference: data.reference, whatsappLink: data.whatsappLink })
     } catch (err) {
-      setError('Failed to create order. Please try again.')
+      setError(err instanceof Error ? err.message : 'Failed to create order. Please try again.')
       console.error('[v0] Checkout error:', err)
     } finally {
       setLoading(false)
     }
+  }
+
+  if (orderResult) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 text-center">
+        <div className="w-16 h-16 rounded-full bg-[#e8d4d4] flex items-center justify-center mb-6">
+          <PackageCheck className="w-8 h-8 text-[#d4a5a5]" />
+        </div>
+        <h1 className="font-serif text-3xl font-bold text-[#2a2a2a] mb-2">Order Received!</h1>
+        <p className="text-[#8b8b8b] mb-1">Your reference number is</p>
+        <p className="font-mono font-bold text-xl text-[#2a2a2a] mb-6">{orderResult.reference}</p>
+        <p className="text-[#8b8b8b] max-w-md mb-8">
+          The last step is confirming your order and payment directly with Zeedat on WhatsApp — she'll take it
+          from here.
+        </p>
+
+        <a
+          href={orderResult.whatsappLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 bg-[#25D366] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#1fa855] transition-colors mb-4"
+        >
+          <MessageCircle className="w-5 h-5" />
+          Confirm Order on WhatsApp
+        </a>
+
+        <Link
+          href={`/order-tracking/${orderResult.reference}`}
+          className="text-[#d4a5a5] hover:text-[#c4956f] text-sm"
+        >
+          Track this order
+        </Link>
+      </div>
+    )
   }
 
   return (
@@ -202,19 +236,21 @@ export default function CheckoutPage() {
                 Payment Method
               </h3>
               <div className="space-y-3">
-                <label className="flex items-center gap-3 p-3 border border-[#e8dfd9] rounded-lg cursor-pointer hover:bg-white">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="WHATSAPP_MANUAL"
-                    checked={formData.paymentMethod === 'WHATSAPP_MANUAL'}
-                    onChange={handleInputChange}
-                  />
+                <div className="flex items-center gap-3 p-3 border border-[#e8dfd9] rounded-lg bg-white">
+                  <MessageCircle className="w-5 h-5 text-[#25D366] flex-shrink-0" />
                   <span className="flex-1">
-                    <p className="font-medium text-[#2a2a2a]">WhatsApp Payment</p>
-                    <p className="text-sm text-[#8b8b8b]">Confirm payment via WhatsApp message</p>
+                    <p className="font-medium text-[#2a2a2a]">Confirm via WhatsApp</p>
+                    <p className="text-sm text-[#8b8b8b]">
+                      We'll send your order details to Zeedat's WhatsApp to confirm payment and delivery.
+                    </p>
                   </span>
-                </label>
+                </div>
+                <div className="flex items-center gap-3 p-3 border border-dashed border-[#e8dfd9] rounded-lg opacity-60">
+                  <span className="flex-1">
+                    <p className="font-medium text-[#2a2a2a]">Pay with Paystack</p>
+                    <p className="text-sm text-[#8b8b8b]">Coming soon</p>
+                  </span>
+                </div>
               </div>
             </div>
 

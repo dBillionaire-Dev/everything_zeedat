@@ -1,8 +1,17 @@
 'use client'
 
 import { createClient } from './supabase/client';
+import { generateOrderReference } from './order-reference';
 
 // Types
+export interface CustomizationOption {
+  id: string;
+  label: string;
+  type: 'text' | 'select';
+  extraCost: number;
+  choices?: string[]; // only used when type === 'select'
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -13,7 +22,7 @@ export interface Product {
   occasion_tags: string[];
   images: string[];
   is_customizable: boolean;
-  customization_options: Record<string, any>;
+  customization_options: { options: CustomizationOption[] };
   stock_status: 'in-stock' | 'low-stock' | 'out-of-stock';
   is_featured: boolean;
   created_at: string;
@@ -71,11 +80,8 @@ export interface CustomOrderRequest {
 }
 
 // Helper to generate order reference
-function generateOrderReference(): string {
-  const timestamp = Date.now().toString(36).toUpperCase();
-  const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-  return `ORD-${timestamp}-${random}`;
-}
+// (defined in ./order-reference.ts — see that file for why it's not defined
+// here directly, in a file marked 'use client')
 
 // API namespace object for client-side usage
 export const api = {
@@ -120,6 +126,49 @@ export const api = {
       if (error) throw error;
       return data as Product[];
     },
+
+    async getOne(id: string) {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+      return data as Product;
+    },
+
+    async create(product: Omit<Product, 'id' | 'created_at' | 'updated_at'>) {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('products')
+        .insert([product])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as Product;
+    },
+
+    async update(id: string, updates: Partial<Omit<Product, 'id' | 'created_at' | 'updated_at'>>) {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('products')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as Product;
+    },
+
+    async remove(id: string) {
+      const supabase = createClient();
+      const { error } = await supabase.from('products').delete().eq('id', id);
+      if (error) throw error;
+    },
   },
 
   orders: {
@@ -153,17 +202,19 @@ export const api = {
       return data as Order;
     },
 
-    async getByReference(reference: string) {
+    async getByReference(reference: string, phone: string) {
       const supabase = createClient();
-      // Public order-tracking now goes through a security-definer RPC rather
+      // Public order-tracking goes through a security-definer RPC rather
       // than a direct table SELECT, since orders.select is admin-only under
-      // RLS. See scripts/002_admin_auth_and_security.sql.
+      // RLS. The RPC also requires the phone number on the order to match,
+      // so a reference number alone can no longer be used to pull up
+      // someone else's name/address/phone. See scripts/002 and scripts/003.
       const { data, error } = await supabase
-        .rpc('get_order_by_reference', { p_reference: reference })
+        .rpc('get_order_by_reference', { p_reference: reference, p_phone: phone })
         .maybeSingle();
 
       if (error) throw error;
-      if (!data) throw new Error('Order not found');
+      if (!data) throw new Error('Order not found. Check your reference number and phone number.');
       return data as unknown as Order;
     },
 
@@ -212,6 +263,15 @@ export const api = {
       if (error) throw error;
       return data as OrderItem[];
     },
+
+    async remove(orderId: string) {
+      const supabase = createClient();
+      // order_items has ON DELETE CASCADE on its order_id foreign key
+      // (see scripts/001_create_schema.sql), so this removes the order's
+      // line items automatically too.
+      const { error } = await supabase.from('orders').delete().eq('id', orderId);
+      if (error) throw error;
+    },
   },
 
   customOrders: {
@@ -254,6 +314,12 @@ export const api = {
 
       if (error) throw error;
       return data as CustomOrderRequest;
+    },
+
+    async remove(id: string) {
+      const supabase = createClient();
+      const { error } = await supabase.from('custom_order_requests').delete().eq('id', id);
+      if (error) throw error;
     },
   },
 }

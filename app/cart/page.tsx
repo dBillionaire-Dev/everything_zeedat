@@ -1,11 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowLeft, Trash2, Plus, Minus } from 'lucide-react'
+import { ArrowLeft, Trash2, Plus, Minus, Heart } from 'lucide-react'
 import { useCart } from '@/lib/cart-context'
+import { useWishlist } from '@/lib/wishlist-context'
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, total } = useCart()
+  const { toggle, isSaved } = useWishlist()
   const deliveryFee = 2000
   const grandTotal = total + deliveryFee
 
@@ -43,7 +45,16 @@ export default function CartPage() {
                     key={item.productId}
                     className="border border-[#e8dfd9] rounded-lg p-4 flex gap-4"
                   >
-                    <div className="w-24 h-24 bg-[#e8d4d4] rounded-lg flex-shrink-0" />
+                    {item.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-24 h-24 rounded-lg flex-shrink-0 object-cover"
+                      />
+                    ) : (
+                      <div className="w-24 h-24 bg-[#e8d4d4] rounded-lg flex-shrink-0" />
+                    )}
                     <div className="flex-1">
                       <h3 className="font-serif font-semibold text-[#2a2a2a]">
                         {item.name}
@@ -71,12 +82,30 @@ export default function CartPage() {
                       <span className="font-serif font-bold text-[#d4a5a5]">
                         ₦{(item.price * item.quantity / 1000).toFixed(0)}k
                       </span>
-                      <button
-                        onClick={() => removeItem(item.productId)}
-                        className="p-2 hover:bg-[#f9f7f4] rounded text-[#d4a5a5]"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() =>
+                            toggle({
+                              productId: item.productId,
+                              name: item.name,
+                              price: item.price,
+                              slug: item.slug || '',
+                              image: item.image,
+                            })
+                          }
+                          className="p-2 hover:bg-[#f9f7f4] rounded text-[#d4a5a5]"
+                          aria-label={isSaved(item.productId) ? 'Saved to wishlist' : 'Save to wishlist'}
+                        >
+                          <Heart className={`w-4 h-4 ${isSaved(item.productId) ? 'fill-[#d4a5a5]' : ''}`} />
+                        </button>
+                        <button
+                          onClick={() => removeItem(item.productId)}
+                          className="p-2 hover:bg-[#f9f7f4] rounded text-[#d4a5a5]"
+                          aria-label="Remove from cart"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -121,15 +150,9 @@ export default function CartPage() {
                   >
                     Proceed to Checkout
                   </Link>
-
-                  <a
-                    href={`https://wa.me/2348131288947?text=Hi!%20I%20have%20items%20in%20my%20cart%20totaling%20₦${grandTotal}%20and%20I%20need%20to%20proceed%20with%20my%20order.`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block w-full bg-[#25D366] text-white px-4 py-3 rounded-lg font-medium hover:bg-[#1fa855] transition-colors text-center"
-                  >
-                    Order via WhatsApp
-                  </a>
+                  <p className="text-xs text-center text-[#8b8b8b]">
+                    You'll confirm your order and payment on WhatsApp as the final step.
+                  </p>
                 </div>
               </div>
             </div>

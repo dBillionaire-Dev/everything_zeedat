@@ -24,7 +24,7 @@ export default function AdminPage() {
           products: productsData.length,
         })
       } catch (error) {
-        console.error('[v0] Error fetching stats:', error)
+        console.error('Error fetching stats:', error)
       } finally {
         setLoading(false)
       }
@@ -112,7 +112,7 @@ export default function AdminPage() {
         {/* Info Box */}
         <div className="mt-12 bg-[#e8d4d4] bg-opacity-50 border border-[#d4a5a5] rounded-lg p-6">
           <p className="text-[#2a2a2a]">
-            <span className="font-semibold">Admin Tip:</span> Use the navigation above to manage orders, custom requests, and products. Changes are saved in real-time to your Supabase database.
+            <span className="font-semibold">Admin Tip:</span> Use the navigation above to manage orders, custom requests, and products. Changes are saved in real-time to your database.
           </p>
         </div>
       </div>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Check, Clock } from 'lucide-react'
+import { ArrowLeft, Check, Clock, Trash2 } from 'lucide-react'
 import { api } from '@/lib/api'
 import type { Order } from '@/lib/api'
 
@@ -19,6 +19,8 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedFilter, setSelectedFilter] = useState<string>('all')
+  const [confirmingId, setConfirmingId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -44,6 +46,19 @@ export default function AdminOrdersPage() {
       setOrders(prev => prev.map(o => o.id === orderId ? updated : o))
     } catch (error) {
       console.error('[v0] Error updating order:', error)
+    }
+  }
+
+  const handleDelete = async (orderId: string) => {
+    setDeletingId(orderId)
+    try {
+      await api.orders.remove(orderId)
+      setOrders(prev => prev.filter(o => o.id !== orderId))
+    } catch (error) {
+      console.error('[v0] Error deleting order:', error)
+    } finally {
+      setDeletingId(null)
+      setConfirmingId(null)
     }
   }
 
@@ -101,6 +116,7 @@ export default function AdminOrdersPage() {
                     <th className="px-6 py-3 text-left text-sm font-semibold text-[#2a2a2a]">Status</th>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-[#2a2a2a]">Date</th>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-[#2a2a2a]">Action</th>
+                    <th className="px-6 py-3 text-right text-sm font-semibold text-[#2a2a2a]">Delete</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -126,9 +142,10 @@ export default function AdminOrdersPage() {
                       </td>
                       <td className="px-6 py-4">
                         <select
+                          style={{ colorScheme: 'light' }}
                           value={order.status}
                           onChange={(e) => handleStatusChange(order.id, e.target.value as Order['status'])}
-                          className="px-3 py-1 border border-[#e8dfd9] rounded text-sm focus:outline-none focus:border-[#d4a5a5]"
+                          className="px-3 py-1 border border-[#e8dfd9] rounded text-sm focus:outline-none focus:border-[#d4a5a5] text-[#2a2a2a] bg-white"
                         >
                           <option value="RECEIVED">Received</option>
                           <option value="CONFIRMED">Confirmed</option>
@@ -137,6 +154,33 @@ export default function AdminOrdersPage() {
                           <option value="DELIVERED">Delivered</option>
                           <option value="CANCELLED">Cancelled</option>
                         </select>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        {confirmingId === order.id ? (
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => handleDelete(order.id)}
+                              disabled={deletingId === order.id}
+                              className="text-xs px-2 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+                            >
+                              {deletingId === order.id ? 'Deleting...' : 'Confirm'}
+                            </button>
+                            <button
+                              onClick={() => setConfirmingId(null)}
+                              className="text-xs px-2 py-1.5 rounded-lg text-[#8b8b8b] hover:bg-[#f9f7f4]"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setConfirmingId(order.id)}
+                            className="p-2 text-[#8b8b8b] hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            aria-label="Delete order"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}

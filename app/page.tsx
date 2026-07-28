@@ -1,7 +1,26 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight, Gift, Heart, Sparkles } from 'lucide-react'
+import { api } from '@/lib/api'
+import type { Product } from '@/lib/api'
+import { useWishlist } from '@/lib/wishlist-context'
 
 export default function Home() {
+  const [featured, setFeatured] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+  const { toggle, isSaved } = useWishlist()
+
+  useEffect(() => {
+    api.products
+      .list({ featured: true })
+      .then(data => setFeatured(data.slice(0, 4)))
+      .catch(err => console.error('[v0] Error fetching featured products:', err))
+      .finally(() => setLoading(false))
+  }, [])
+
   return (
     <>
       {/* Hero Section */}
@@ -30,9 +49,15 @@ export default function Home() {
                 </Link>
               </div>
             </div>
-            <div className="relative h-64 md:h-96 bg-[#e8d4d4] rounded-2xl overflow-hidden">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Gift className="w-32 h-32 text-[#d4a5a5] opacity-40" />
+            <div className="flex justify-center">
+              <div className="relative w-72 h-72 md:w-96 md:h-96 rounded-full overflow-hidden border-8 border-[#d4a5a5] shadow-2xl">
+                <Image
+                  src="/hero.png"
+                  alt="Luxury Gift Hamper"
+                  fill
+                  priority
+                  className="object-cover"
+                />
               </div>
             </div>
           </div>
@@ -60,7 +85,7 @@ export default function Home() {
               {
                 icon: Gift,
                 title: 'Custom Orders',
-                description: 'Tell us your vision and budget—we&apos;ll create the perfect custom gift experience.'
+                description: "Tell us your vision and budget, and we'll create the perfect custom gift experience."
               }
             ].map((feature, idx) => {
               const Icon = feature.icon
@@ -91,27 +116,60 @@ export default function Home() {
               View All <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {Array(4).fill(0).map((_, i) => (
-              <Link key={i} href="/shop" className="group">
-                <div className="bg-white rounded-xl overflow-hidden border border-[#e8dfd9] hover:border-[#d4a5a5] transition-colors">
-                  <div className="aspect-square bg-[#e8d4d4] flex items-center justify-center">
-                    <Gift className="w-16 h-16 text-[#d4a5a5] opacity-40" />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-serif font-semibold text-[#2a2a2a] text-sm">Featured Gift</h3>
-                    <p className="text-[#8b8b8b] text-xs mt-1">Premium Collection</p>
-                    <div className="mt-3 flex items-center justify-between">
-                      <span className="font-semibold text-[#2a2a2a]">₦15,000</span>
-                      <button className="p-1 bg-[#e8d4d4] rounded hover:bg-[#d4a5a5] transition-colors">
-                        <Heart className="w-4 h-4 text-[#d4a5a5]" />
-                      </button>
-                    </div>
+          {loading ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {Array(4).fill(0).map((_, i) => (
+                <div key={i} className="bg-white rounded-xl overflow-hidden border border-[#e8dfd9] animate-pulse">
+                  <div className="aspect-square bg-[#e8d4d4]" />
+                  <div className="p-4 space-y-2">
+                    <div className="h-4 bg-[#e8d4d4] rounded w-3/4" />
+                    <div className="h-3 bg-[#e8d4d4] rounded w-1/2" />
                   </div>
                 </div>
-              </Link>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : featured.length === 0 ? (
+            <p className="text-center text-[#8b8b8b] py-8">
+              No featured products yet — check back soon, or{' '}
+              <Link href="/shop" className="text-[#d4a5a5] hover:text-[#c4956f]">browse the full shop</Link>.
+            </p>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featured.map(product => (
+                <Link key={product.id} href={`/shop/${product.slug}`} className="group">
+                  <div className="bg-white rounded-xl overflow-hidden border border-[#e8dfd9] hover:border-[#d4a5a5] transition-colors">
+                    <div className="aspect-square bg-[#e8d4d4] flex items-center justify-center overflow-hidden">
+                      {product.images?.[0] ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <Gift className="w-16 h-16 text-[#d4a5a5] opacity-40" />
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-serif font-semibold text-[#2a2a2a] text-sm line-clamp-1">{product.name}</h3>
+                      <p className="text-[#8b8b8b] text-xs mt-1 capitalize">{product.category.replace('-', ' ')}</p>
+                      <div className="mt-3 flex items-center justify-between">
+                        <span className="font-semibold text-[#2a2a2a]">₦{product.price.toLocaleString()}</span>
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            toggle({ productId: product.id, name: product.name, price: product.price, slug: product.slug, image: product.images?.[0] })
+                          }}
+                          className={`p-1 rounded transition-colors ${
+                            isSaved(product.id) ? 'bg-[#d4a5a5]' : 'bg-[#e8d4d4] hover:bg-[#d4a5a5]'
+                          }`}
+                        >
+                          <Heart className={`w-4 h-4 ${isSaved(product.id) ? 'fill-white text-white' : 'text-[#d4a5a5]'}`} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -138,7 +196,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h4 className="font-serif font-semibold text-lg mb-4">Zeedat Gifts</h4>
+              <span className="font-serif font-semibold text-[#b8b8b8] text-lg">
+                Zeedat Gifts
+              </span>
               <p className="text-[#b8b8b8] text-sm">Premium personalized gifts for every occasion.</p>
             </div>
             <div>
@@ -164,7 +224,11 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t border-[#4a4a4a] pt-8 text-center text-sm text-[#b8b8b8]">
-            <p>&copy; 2024 Gifts by EverythingZeedat. All rights reserved.</p>
+            <p>
+              <a href="https://nex.is-a.dev/" target="_blank" rel="noopener noreferrer" className="hover:text-white">
+                &copy; {new Date().getFullYear()} Gifts by EverythingZeedat. All rights reserved.
+              </a>
+            </p>
           </div>
         </div>
       </footer>

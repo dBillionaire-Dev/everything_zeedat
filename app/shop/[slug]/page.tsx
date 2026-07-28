@@ -2,18 +2,26 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Heart, ShoppingCart, ArrowLeft, Minus, Plus } from 'lucide-react'
+import { Heart, ShoppingCart, ArrowLeft, Minus, Plus, Check } from 'lucide-react'
 import { api } from '@/lib/api'
 import type { Product } from '@/lib/api'
+import { useCart } from '@/lib/cart-context'
+import { useWishlist } from '@/lib/wishlist-context'
 
 export default function ProductPage() {
   const params = useParams()
   const router = useRouter()
   const slug = params.slug as string
-  
+
+  const { addItem } = useCart()
+  const { toggle, isSaved, remove } = useWishlist()
+
   const [product, setProduct] = useState<Product | null>(null)
   const [quantity, setQuantity] = useState(1)
   const [loading, setLoading] = useState(true)
+  const [justAdded, setJustAdded] = useState(false)
+  const [selectedImage, setSelectedImage] = useState(0)
+  const [customizationValues, setCustomizationValues] = useState<Record<string, string>>({})
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -44,9 +52,41 @@ export default function ProductPage() {
     )
   }
 
+  const customizationOptions = product.customization_options?.options ?? []
+
+  const extraCost = customizationOptions.reduce((sum, opt) => {
+    const value = customizationValues[opt.id]
+    return value ? sum + opt.extraCost : sum
+  }, 0)
+
+  const unitPrice = product.price + extraCost
+
   const handleAddToCart = () => {
-    // This will be connected to cart context later
-    console.log('[v0] Adding to cart:', product.id, quantity)
+    const customizationLabels: Record<string, string> = {}
+    for (const opt of customizationOptions) {
+      const value = customizationValues[opt.id]
+      if (value) customizationLabels[opt.label] = value
+    }
+
+    addItem({
+      productId: product.id,
+      name: product.name,
+      price: unitPrice,
+      quantity,
+      image: product.images?.[0],
+      slug: product.slug,
+      customization: Object.keys(customizationLabels).length > 0 ? customizationLabels : undefined,
+    })
+    // Once something is in the cart, it doesn't need to stay on the wishlist too.
+    remove(product.id)
+    setJustAdded(true)
+    setTimeout(() => setJustAdded(false), 2000)
+  }
+
+  const wishlisted = isSaved(product.id)
+
+  const handleToggleWishlist = () => {
+    toggle({ productId: product.id, name: product.name, price: product.price, slug: product.slug, image: product.images?.[0] })
   }
 
   const categoryLabel = {
@@ -74,12 +114,38 @@ export default function ProductPage() {
         <div className="grid md:grid-cols-2 gap-12">
           {/* Image */}
           <div>
-            <div className="aspect-square bg-[#e8d4d4] rounded-2xl flex items-center justify-center sticky top-20">
-              <div className="text-center">
-                <div className="w-24 h-24 mx-auto rounded-full bg-[#d4a5a5] opacity-20 mb-4" />
-                <p className="text-[#8b8b8b]">{categoryLabel}</p>
-              </div>
+            <div className="aspect-square bg-[#e8d4d4] rounded-2xl flex items-center justify-center sticky top-20 overflow-hidden">
+              {product.images?.length > 0 ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={product.images[selectedImage] || product.images[0]}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="text-center">
+                  <div className="w-24 h-24 mx-auto rounded-full bg-[#d4a5a5] opacity-20 mb-4" />
+                  <p className="text-[#8b8b8b]">{categoryLabel}</p>
+                </div>
+              )}
             </div>
+
+            {product.images?.length > 1 && (
+              <div className="flex gap-2 mt-3">
+                {product.images.map((img, i) => (
+                  <button
+                    key={img}
+                    onClick={() => setSelectedImage(i)}
+                    className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors ${
+                      i === selectedImage ? 'border-[#d4a5a5]' : 'border-transparent'
+                    }`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Details */}
@@ -105,29 +171,60 @@ export default function ProductPage() {
             <div className="mb-8 pb-8 border-b border-[#e8dfd9]">
               <div className="flex items-baseline gap-3">
                 <span className="text-4xl font-serif font-bold text-[#d4a5a5]">
-                  ₦{(product.price / 1000).toFixed(0)}k
+                  ₦{unitPrice.toLocaleString()}
                 </span>
                 <span className="text-sm text-[#8b8b8b]">
                   {product.stock_status === 'in-stock' ? 'In Stock' : product.stock_status === 'low-stock' ? 'Low Stock' : 'Out of Stock'}
                 </span>
               </div>
+              {extraCost > 0 && (
+                <p className="text-sm text-[#8b8b8b] mt-1">
+                  ₦{product.price.toLocaleString()} base + ₦{extraCost.toLocaleString()} customization
+                </p>
+              )}
             </div>
 
             {/* Customization */}
-            {product.is_customizable && (
+            {product.is_customizable && customizationOptions.length > 0 && (
               <div className="mb-8 pb-8 border-b border-[#e8dfd9]">
                 <h3 className="font-serif font-semibold text-[#2a2a2a] mb-3">
                   Customization Options
                 </h3>
-                <p className="text-[#8b8b8b] text-sm mb-4">
-                  This item can be customized. You&apos;ll be able to add personalization details during checkout.
-                </p>
-                <div className="space-y-2">
-                  {['Engraving', 'Custom Message', 'Gift Wrapping'].map(option => (
-                    <label key={option} className="flex items-center gap-3">
-                      <input type="checkbox" className="rounded" />
-                      <span className="text-sm text-[#2a2a2a]">{option}</span>
-                    </label>
+                <div className="space-y-4">
+                  {customizationOptions.map(option => (
+                    <div key={option.id}>
+                      <label className="block text-sm font-medium text-[#2a2a2a] mb-1">
+                        {option.label}
+                        {option.extraCost > 0 && (
+                          <span className="text-[#d4a5a5] font-normal"> (+₦{option.extraCost.toLocaleString()})</span>
+                        )}
+                      </label>
+                      {option.type === 'text' ? (
+                        <input
+                          type="text"
+                          value={customizationValues[option.id] || ''}
+                          onChange={e =>
+                            setCustomizationValues(prev => ({ ...prev, [option.id]: e.target.value }))
+                          }
+                          placeholder={`Enter ${option.label.toLowerCase()}`}
+                          className="w-full px-4 py-2 border border-[#e8dfd9] rounded-lg focus:outline-none focus:border-[#d4a5a5] text-[#2a2a2a] bg-white"
+                        />
+                      ) : (
+                        <select
+                          style={{ colorScheme: 'light' }}
+                          value={customizationValues[option.id] || ''}
+                          onChange={e =>
+                            setCustomizationValues(prev => ({ ...prev, [option.id]: e.target.value }))
+                          }
+                          className="w-full px-4 py-2 border border-[#e8dfd9] rounded-lg focus:outline-none focus:border-[#d4a5a5] text-[#2a2a2a] bg-white"
+                        >
+                          <option value="">None</option>
+                          {(option.choices || []).map(choice => (
+                            <option key={choice} value={choice}>{choice}</option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
@@ -173,13 +270,16 @@ export default function ProductPage() {
                 disabled={product.stock_status === 'out-of-stock'}
                 className="w-full bg-[#d4a5a5] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#c4956f] transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <ShoppingCart className="w-5 h-5" />
-                Add to Cart
+                {justAdded ? <Check className="w-5 h-5" /> : <ShoppingCart className="w-5 h-5" />}
+                {justAdded ? 'Added to Cart' : 'Add to Cart'}
               </button>
 
-              <button className="w-full border-2 border-[#e8dfd9] text-[#2a2a2a] px-6 py-3 rounded-lg font-medium hover:border-[#d4a5a5] transition-colors flex items-center justify-center gap-2">
-                <Heart className="w-5 h-5" />
-                Save to Wishlist
+              <button
+                onClick={handleToggleWishlist}
+                className="w-full border-2 border-[#e8dfd9] text-[#2a2a2a] px-6 py-3 rounded-lg font-medium hover:border-[#d4a5a5] transition-colors flex items-center justify-center gap-2"
+              >
+                <Heart className={`w-5 h-5 ${wishlisted ? 'fill-[#d4a5a5] text-[#d4a5a5]' : ''}`} />
+                {wishlisted ? 'Saved to Wishlist' : 'Save to Wishlist'}
               </button>
 
               <a

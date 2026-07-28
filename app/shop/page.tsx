@@ -5,12 +5,14 @@ import Link from 'next/link'
 import { Heart, ChevronDown } from 'lucide-react'
 import { api } from '@/lib/api'
 import type { Product } from '@/lib/api'
+import { useWishlist } from '@/lib/wishlist-context'
 
 export default function ShopPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [loading, setLoading] = useState(true)
+  const { toggle, isSaved } = useWishlist()
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -100,10 +102,19 @@ export default function ShopPage() {
                   <Link key={product.id} href={`/shop/${product.slug}`} className="group">
                     <div className="bg-white rounded-xl overflow-hidden border border-[#e8dfd9] hover:border-[#d4a5a5] transition-all hover:shadow-lg">
                       <div className="aspect-square bg-[#e8d4d4] flex items-center justify-center relative overflow-hidden">
-                        <div className="text-center">
-                          <div className="w-20 h-20 mx-auto rounded-full bg-[#d4a5a5] opacity-20 mb-2" />
-                          <p className="text-xs text-[#8b8b8b]">{product.category}</p>
-                        </div>
+                        {product.images?.[0] ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={product.images[0]}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="text-center">
+                            <div className="w-20 h-20 mx-auto rounded-full bg-[#d4a5a5] opacity-20 mb-2" />
+                            <p className="text-xs text-[#8b8b8b]">{product.category}</p>
+                          </div>
+                        )}
                         {product.is_featured && (
                           <div className="absolute top-3 right-3 bg-[#d4a5a5] text-white text-xs px-3 py-1 rounded-full">
                             Featured
@@ -125,10 +136,13 @@ export default function ShopPage() {
                             onClick={(e) => {
                               e.preventDefault()
                               e.stopPropagation()
+                              toggle({ productId: product.id, name: product.name, price: product.price, slug: product.slug, image: product.images?.[0] })
                             }}
-                            className="p-2 bg-[#e8d4d4] rounded-lg hover:bg-[#d4a5a5] transition-colors"
+                            className={`p-2 rounded-lg transition-colors ${
+                              isSaved(product.id) ? 'bg-[#d4a5a5]' : 'bg-[#e8d4d4] hover:bg-[#d4a5a5]'
+                            }`}
                           >
-                            <Heart className="w-4 h-4 text-[#d4a5a5]" />
+                            <Heart className={`w-4 h-4 ${isSaved(product.id) ? 'fill-white text-white' : 'text-[#d4a5a5]'}`} />
                           </button>
                         </div>
                         {product.is_customizable && (

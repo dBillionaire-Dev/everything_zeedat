@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircle, Clock, Package, Truck, ArrowLeft } from 'lucide-react'
+import { CheckCircle, Package, Truck, ArrowLeft, AlertCircle, Lock } from 'lucide-react'
 import { api } from '@/lib/api'
 import type { Order } from '@/lib/api'
 
@@ -20,38 +20,87 @@ export default function OrderTrackingPage() {
   const reference = params.reference as string
 
   const [order, setOrder] = useState<Order | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [phone, setPhone] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [checked, setChecked] = useState(false)
 
-  useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        const data = await api.orders.getByReference(reference)
-        setOrder(data)
-      } catch (error) {
-        console.error('[v0] Error fetching order:', error)
-      } finally {
-        setLoading(false)
-      }
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    setChecked(true)
+
+    try {
+      const data = await api.orders.getByReference(reference, phone)
+      setOrder(data)
+    } catch (err) {
+      setOrder(null)
+      setError(err instanceof Error ? err.message : 'Order not found.')
+    } finally {
+      setLoading(false)
     }
-    fetchOrder()
-  }, [reference])
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <p className="text-[#8b8b8b]">Loading order details...</p>
-      </div>
-    )
   }
 
+  // Gate: require the phone number on the order before showing any details.
+  // This is what stops a reference number alone (which shows up in URLs and
+  // emails) from exposing someone else's name, address, and phone number.
   if (!order) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
-        <p className="text-lg text-[#8b8b8b] mb-4">Order not found</p>
-        <Link href="/shop" className="text-[#d4a5a5] hover:text-[#c4956f] flex items-center gap-2">
-          <ArrowLeft className="w-4 h-4" />
-          Back to Shop
-        </Link>
+      <div className="min-h-screen bg-white">
+        <section className="bg-gradient-to-r from-[#e8d4d4] to-[#f4e4d0] py-12">
+          <div className="max-w-7xl mx-auto px-4">
+            <Link href="/shop" className="flex items-center gap-2 text-[#d4a5a5] hover:text-[#c4956f] mb-4">
+              <ArrowLeft className="w-4 h-4" />
+              Back to Shop
+            </Link>
+            <h1 className="text-4xl md:text-5xl font-serif font-bold text-[#2a2a2a]">
+              Order Tracking
+            </h1>
+          </div>
+        </section>
+
+        <div className="max-w-md mx-auto px-4 py-16">
+          <div className="bg-[#f9f7f4] rounded-xl p-8 text-center">
+            <div className="w-12 h-12 rounded-full bg-[#e8d4d4] flex items-center justify-center mx-auto mb-4">
+              <Lock className="w-6 h-6 text-[#d4a5a5]" />
+            </div>
+            <h2 className="font-serif font-semibold text-xl text-[#2a2a2a] mb-2">Confirm it's you</h2>
+            <p className="text-sm text-[#8b8b8b] mb-6">
+              Enter the phone number used on order <span className="font-mono font-medium">{reference}</span> to
+              view its status.
+            </p>
+
+            <form onSubmit={handleVerify} className="space-y-4 text-left">
+              <div>
+                <label className="block text-sm font-medium text-[#2a2a2a] mb-1">Phone Number</label>
+                <input
+                  type="tel"
+                  required
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  placeholder="e.g. 0813 128 8947"
+                  className="w-full px-4 py-2 border border-[#e8dfd9] rounded-lg focus:outline-none focus:border-[#d4a5a5]"
+                />
+              </div>
+
+              {checked && error && (
+                <div className="flex items-start gap-2 bg-red-50 text-red-700 text-sm rounded-lg p-3">
+                  <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-[#d4a5a5] text-white px-6 py-2.5 rounded-lg font-medium hover:bg-[#c4956f] transition-colors disabled:opacity-50"
+              >
+                {loading ? 'Checking...' : 'View Order Status'}
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     )
   }
