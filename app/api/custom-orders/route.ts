@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase/service-role';
 import { sendCustomOrderConfirmation, sendCustomOrderNotificationToAdmin } from '@/lib/email-service';
 import { generateAdminWhatsAppMessage } from '@/lib/whatsapp-service';
 
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create custom order in Supabase
-    const supabase = await createClient();
+    const supabase = createServiceRoleClient();
     
     const { data, error } = await supabase
       .from('custom_order_requests')
@@ -55,8 +55,10 @@ export async function POST(request: NextRequest) {
     // Generate reference ID from database ID
     const referenceId = `CO-${data.id.slice(0, 8).toUpperCase()}`;
 
-    // Send confirmation email to customer
-    await sendCustomOrderConfirmation({
+    // Best-effort notifications — the request is already saved above, so a
+    // flaky email provider (e.g. missing/expired Gmail app password)
+    // shouldn't turn a successful submission into an error for the customer.
+    const emailPayload = {
       customerName,
       customerEmail,
       customerPhone,
@@ -65,19 +67,19 @@ export async function POST(request: NextRequest) {
       description,
       preferredDeliveryDate,
       referenceId,
-    });
+    };
 
-    // Send admin notification
-    await sendCustomOrderNotificationToAdmin({
-      customerName,
-      customerEmail,
-      customerPhone,
-      occasion,
-      budgetRange,
-      description,
-      preferredDeliveryDate,
-      referenceId,
-    });
+    const [confirmationResult, adminResult] = await Promise.allSettled([
+      sendCustomOrderConfirmation(emailPayload),
+      sendCustomOrderNotificationToAdmin(emailPayload),
+    ]);
+
+    if (confirmationResult.status === 'rejected') {
+      console.error('[v0] Customer confirmation email failed (non-fatal):', confirmationResult.reason);
+    }
+    if (adminResult.status === 'rejected') {
+      console.error('[v0] Admin notification email failed (non-fatal):', adminResult.reason);
+    }
 
     // Generate admin WhatsApp message (for manual forwarding if needed)
     const adminWhatsAppMessage = generateAdminWhatsAppMessage({

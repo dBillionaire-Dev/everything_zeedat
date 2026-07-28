@@ -255,10 +255,11 @@ export default function CustomOrdersPage() {
               />
 
               <select
+                          style={{ colorScheme: 'light' }}
                 name="budgetRange"
                 value={formData.budgetRange}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-[#e8dfd9] rounded-lg focus:outline-none focus:border-[#d4a5a5]"
+                className="w-full px-4 py-2 border border-[#e8dfd9] rounded-lg focus:outline-none focus:border-[#d4a5a5] text-[#2a2a2a] bg-white"
               >
                 <option value="under-10k">Under ₦10,000</option>
                 <option value="10k-25k">₦10,000 - ₦25,000</option>

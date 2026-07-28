@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Image from 'next/image'
 import Link from 'next/link'
 import { AlertCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -57,7 +58,13 @@ function LoginForm() {
       <div className="max-w-sm w-full">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full" style={{ backgroundColor: '#d4a5a5' }} />
+            <Image
+              src="/logo.png"
+              alt="Zeedat Gifts"
+              width={35}
+              height={35}
+              className="rounded-full"
+            />
             <span className="font-serif text-xl font-semibold text-[#2a2a2a]">Zeedat Gifts</span>
           </Link>
           <h1 className="font-serif text-2xl font-bold text-[#2a2a2a] mt-6">Admin Sign In</h1>

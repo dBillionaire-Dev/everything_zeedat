@@ -65,7 +65,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-[#2a2a2a] mb-1">Location</h3>
-                  <p className="text-[#8b8b8b]">Lagos, Nigeria</p>
+                  <p className="text-[#8b8b8b]">Abuja, Nigeria</p>
                   <p className="text-sm text-[#8b8b8b] mt-1">Nationwide delivery available</p>
                 </div>
               </div>
