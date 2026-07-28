@@ -4,9 +4,11 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { AlertCircle, MessageCircle, PackageCheck } from 'lucide-react'
 import { useCart } from '@/lib/cart-context'
+import { useActiveOrders } from '@/lib/active-orders-context'
 
 export default function CheckoutPage() {
   const { items, total, clear } = useCart()
+  const { addActiveOrder } = useActiveOrders()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [orderResult, setOrderResult] = useState<{ reference: string; whatsappLink: string } | null>(null)
@@ -75,6 +77,7 @@ export default function CheckoutPage() {
       if (!response.ok) throw new Error(data.error || 'Failed to place order')
 
       clear()
+      addActiveOrder(data.reference, formData.phone)
       setOrderResult({ reference: data.reference, whatsappLink: data.whatsappLink })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create order. Please try again.')
@@ -165,14 +168,20 @@ export default function CheckoutPage() {
                   required
                   className="w-full px-4 py-2 border border-[#e8dfd9] rounded-lg focus:outline-none focus:border-[#d4a5a5]"
                 />
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email (optional)"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-[#e8dfd9] rounded-lg focus:outline-none focus:border-[#d4a5a5]"
-                />
+                <div>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Email (optional)"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-[#e8dfd9] rounded-lg focus:outline-none focus:border-[#d4a5a5]"
+                  />
+                  <p className="text-xs text-[#8b8b8b] mt-1.5">
+                    💌 Add your email to get automatic updates as your order is confirmed, prepared, and delivered.
+                    Without it, you'll need to check back manually via Track Order.
+                  </p>
+                </div>
               </div>
             </div>
 

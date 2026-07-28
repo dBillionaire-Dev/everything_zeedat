@@ -227,14 +227,20 @@ export default function CustomOrdersPage() {
                 required
                 className="w-full px-4 py-2 border border-[#e8dfd9] rounded-lg focus:outline-none focus:border-[#d4a5a5]"
               />
-              <input
-                type="email"
-                name="email"
-                placeholder="Email (optional)"
-                value={formData.email}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-[#e8dfd9] rounded-lg focus:outline-none focus:border-[#d4a5a5]"
-              />
+              <div>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email (optional)"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border border-[#e8dfd9] rounded-lg focus:outline-none focus:border-[#d4a5a5]"
+                />
+                <p className="text-xs text-[#8b8b8b] mt-1.5">
+                  💌 Add your email so we can send you a confirmation and keep you posted as we review your request.
+                  Without it, we can only reach you on WhatsApp.
+                </p>
+              </div>
             </div>
           </div>
 

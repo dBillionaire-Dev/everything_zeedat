@@ -1,5 +1,19 @@
 @import 'tailwindcss';
 
+/* Some Chromium builds on Windows render a <select>'s open option-list
+   popup as a genuinely separate native surface that doesn't reliably
+   inherit `color`/`background-color` from the <select> element or its
+   Tailwind classes -- even with color-scheme: light set everywhere and no
+   dark-mode override active. The popup can end up rendering with correct
+   (white) background but invisible text, since the option text color
+   never actually gets set. Setting it directly on `option` (not just
+   `select`) is the fix that reliably reaches that popup. */
+select,
+select option {
+  color: #2a2a2a;
+  background-color: #ffffff;
+}
+
 :root {
   color-scheme: light;
   --background: oklch(1 0 0);

@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle, Package, Truck, ArrowLeft, AlertCircle, Lock } from 'lucide-react'
 import { api } from '@/lib/api'
 import type { Order } from '@/lib/api'
+import { useActiveOrders } from '@/lib/active-orders-context'
 
 const statusSteps = [
   { status: 'RECEIVED', label: 'Order Received', icon: CheckCircle },
@@ -18,12 +19,22 @@ const statusSteps = [
 export default function OrderTrackingPage() {
   const params = useParams()
   const reference = params.reference as string
+  const { activeOrders } = useActiveOrders()
 
   const [order, setOrder] = useState<Order | null>(null)
   const [phone, setPhone] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [checked, setChecked] = useState(false)
+
+  // Convenience only, not a security bypass: if this device already placed
+  // this order, we know the phone number it used -- prefill it so the
+  // customer doesn't have to retype it, but the server-side RPC still
+  // requires it to match before returning anything.
+  useEffect(() => {
+    const match = activeOrders.find(o => o.reference === reference)
+    if (match) setPhone(match.phone)
+  }, [activeOrders, reference])
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -136,8 +147,16 @@ export default function OrderTrackingPage() {
               <p className="font-semibold text-[#2a2a2a] capitalize">{order.status.replace(/_/g, ' ')}</p>
             </div>
             <div>
-              <p className="text-xs text-[#8b8b8b] uppercase">Payment</p>
-              <p className="font-semibold text-[#2a2a2a]">{order.payment_status}</p>
+              <p className="text-xs text-[#8b8b8b] uppercase mb-1">Payment</p>
+              <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                order.payment_status === 'PAID'
+                  ? 'bg-green-100 text-green-800'
+                  : order.payment_status === 'FAILED'
+                  ? 'bg-red-100 text-red-800'
+                  : 'bg-gray-100 text-gray-700'
+              }`}>
+                {order.payment_status === 'PAID' ? '✓ Paid' : order.payment_status === 'FAILED' ? 'Failed' : 'Pending'}
+              </span>
             </div>
             <div>
               <p className="text-xs text-[#8b8b8b] uppercase">Total</p>

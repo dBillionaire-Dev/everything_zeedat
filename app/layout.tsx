@@ -5,6 +5,7 @@ import './globals.css'
 import Navigation from '@/components/navigation'
 import { CartProvider } from '@/lib/cart-context'
 import { WishlistProvider } from '@/lib/wishlist-context'
+import { ActiveOrdersProvider } from '@/lib/active-orders-context'
 
 const geist = Geist({ subsets: ['latin'] })
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-serif' })
@@ -75,10 +76,12 @@ export default function RootLayout({
       <body className="antialiased">
         <CartProvider>
           <WishlistProvider>
-            <Navigation />
-            <main>
-              {children}
-            </main>
+            <ActiveOrdersProvider>
+              <Navigation />
+              <main>
+                {children}
+              </main>
+            </ActiveOrdersProvider>
           </WishlistProvider>
         </CartProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}

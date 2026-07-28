@@ -2,7 +2,7 @@
 
 A complete, production-ready e-commerce platform for a premium personalized gift business built with Next.js 16, Supabase, and automated email/WhatsApp notifications.
 
-![Homepage Preview](/og-image.png)
+![Homepage Preview](/public/og-image.png)
 
 ## Features at a Glance
 

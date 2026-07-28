@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Check, Clock, Trash2 } from 'lucide-react'
+import { ArrowLeft, Check, Clock, Trash2, CreditCard } from 'lucide-react'
 import { api } from '@/lib/api'
 import type { Order } from '@/lib/api'
 
@@ -15,12 +15,19 @@ const statusColors: Record<string, string> = {
   'CANCELLED': 'bg-red-100 text-red-800',
 }
 
+const paymentColors: Record<string, string> = {
+  'PENDING': 'bg-gray-100 text-gray-700',
+  'PAID': 'bg-green-100 text-green-800',
+  'FAILED': 'bg-red-100 text-red-800',
+}
+
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedFilter, setSelectedFilter] = useState<string>('all')
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [confirmingPaymentId, setConfirmingPaymentId] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -40,12 +47,35 @@ export default function AdminOrdersPage() {
     ? orders
     : orders.filter(order => order.status === selectedFilter)
 
+  const updateOrder = async (orderId: string, updates: { status?: Order['status']; payment_status?: Order['payment_status'] }) => {
+    const response = await fetch(`/api/orders/${orderId}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
+    })
+    const data = await response.json()
+    if (!response.ok) throw new Error(data.error || 'Failed to update order')
+    return data.order as Order
+  }
+
   const handleStatusChange = async (orderId: string, newStatus: Order['status']) => {
     try {
-      const updated = await api.orders.updateStatus(orderId, newStatus)
+      const updated = await updateOrder(orderId, { status: newStatus })
       setOrders(prev => prev.map(o => o.id === orderId ? updated : o))
     } catch (error) {
       console.error('[v0] Error updating order:', error)
+    }
+  }
+
+  const handleConfirmPayment = async (orderId: string) => {
+    setConfirmingPaymentId(orderId)
+    try {
+      const updated = await updateOrder(orderId, { payment_status: 'PAID' })
+      setOrders(prev => prev.map(o => o.id === orderId ? updated : o))
+    } catch (error) {
+      console.error('[v0] Error confirming payment:', error)
+    } finally {
+      setConfirmingPaymentId(null)
     }
   }
 
@@ -114,6 +144,7 @@ export default function AdminOrdersPage() {
                     <th className="px-6 py-3 text-left text-sm font-semibold text-[#2a2a2a]">Customer</th>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-[#2a2a2a]">Amount</th>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-[#2a2a2a]">Status</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-[#2a2a2a]">Payment</th>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-[#2a2a2a]">Date</th>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-[#2a2a2a]">Action</th>
                     <th className="px-6 py-3 text-right text-sm font-semibold text-[#2a2a2a]">Delete</th>
@@ -139,6 +170,23 @@ export default function AdminOrdersPage() {
                       </td>
                       <td className="px-6 py-4 text-sm text-[#8b8b8b]">
                         {new Date(order.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <div className="flex flex-col gap-1.5 items-start">
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${paymentColors[order.payment_status] || 'bg-gray-100'}`}>
+                            {order.payment_status}
+                          </span>
+                          {order.payment_status !== 'PAID' && (
+                            <button
+                              onClick={() => handleConfirmPayment(order.id)}
+                              disabled={confirmingPaymentId === order.id}
+                              className="flex items-center gap-1 text-xs text-green-700 hover:text-green-800 font-medium disabled:opacity-50"
+                            >
+                              <CreditCard className="w-3 h-3" />
+                              {confirmingPaymentId === order.id ? 'Confirming...' : 'Confirm Payment'}
+                            </button>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <select

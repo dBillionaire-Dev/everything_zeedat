@@ -491,3 +491,96 @@ export async function sendOrderNotificationToAdmin(data: OrderEmailData): Promis
     return false;
   }
 }
+
+// ============================================================================
+// Order status / payment update notification (sent to the customer whenever
+// an admin changes an order's status or confirms payment)
+// ============================================================================
+
+const STATUS_COPY: Record<string, { label: string; blurb: string }> = {
+  RECEIVED: { label: 'Order Received', blurb: "We've got your order and we're getting it ready." },
+  CONFIRMED: { label: 'Confirmed', blurb: 'Your order has been confirmed!' },
+  PREPARING: { label: 'Preparing', blurb: "We're preparing your gift with care." },
+  OUT_FOR_DELIVERY: { label: 'Out for Delivery', blurb: "Your gift is on its way!" },
+  DELIVERED: { label: 'Delivered', blurb: 'Your gift has been delivered. We hope it brought a smile!' },
+  CANCELLED: { label: 'Cancelled', blurb: 'This order has been cancelled.' },
+};
+
+export interface OrderStatusUpdateEmailData {
+  customerName: string;
+  customerEmail?: string | null;
+  reference: string;
+  status: string;
+  paymentStatus: string;
+  paymentJustConfirmed?: boolean;
+}
+
+export async function sendOrderStatusUpdate(data: OrderStatusUpdateEmailData): Promise<boolean> {
+  if (!data.customerEmail) return false;
+
+  try {
+    const statusInfo = STATUS_COPY[data.status] || { label: data.status, blurb: 'Your order status has been updated.' };
+
+    const html = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #faf8f6; margin: 0; padding: 20px; }
+          .container { max-width: 600px; margin: 0 auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+          .header { background: linear-gradient(135deg, #d4a5a5 0%, #c4956f 100%); color: white; padding: 30px; text-align: center; }
+          .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+          .content { padding: 30px; color: #2a2a2a; }
+          .status-badge { display: inline-block; background-color: #f9f7f4; border-left: 4px solid #d4a5a5; padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-weight: 600; color: #2a2a2a; }
+          .payment-note { background-color: #eefaf0; border-left: 4px solid #22c55e; padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-size: 14px; }
+          .cta-button { display: inline-block; background-color: #d4a5a5; color: white; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; }
+          .footer { background-color: #f9f7f4; padding: 20px; text-align: center; font-size: 12px; color: #8b8b8b; border-top: 1px solid #e8dfd9; }
+          .footer-link { color: #d4a5a5; text-decoration: none; }
+          .reference-id { font-family: monospace; background-color: #faf8f6; padding: 2px 6px; border-radius: 3px; color: #d4a5a5; font-weight: 600; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header"><h1>🎁 Order Update</h1></div>
+          <div class="content">
+            <p>Hi <strong>${data.customerName}</strong>,</p>
+            <p>${statusInfo.blurb}</p>
+
+            <div class="status-badge">
+              Order ${`<span class="reference-id">${data.reference}</span>`} is now: ${statusInfo.label}
+            </div>
+
+            ${
+              data.paymentJustConfirmed
+                ? `<div class="payment-note">✅ We've also confirmed receipt of your payment for this order. Thank you!</div>`
+                : ''
+            }
+
+            <p style="font-size: 13px; color: #8b8b8b; margin-top: 20px;">
+              You can check full details any time using your reference number and phone number on our Order Tracking page.
+            </p>
+          </div>
+          <div class="footer">
+            <p style="margin: 0 0 10px 0;"><strong>Gifts by EverythingZeedat</strong></p>
+            <p style="margin: 0;">📱 WhatsApp: <a href="https://wa.me/2348131288947" class="footer-link">+234 813 128 8947</a> · 📷 <a href="https://instagram.com/gifts.by.everythingzeedat" class="footer-link">@gifts.by.everythingzeedat</a></p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    await transporter.sendMail({
+      from: process.env.GMAIL_EMAIL,
+      to: data.customerEmail,
+      subject: `Order Update: ${statusInfo.label} - Reference: ${data.reference}`,
+      html,
+    });
+
+    console.log(`[v0] Order status update email sent for ${data.reference}`);
+    return true;
+  } catch (error) {
+    console.error('[v0] Order status update email failed:', error);
+    return false;
+  }
+}

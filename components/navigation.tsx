@@ -3,17 +3,20 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState } from 'react'
-import { ShoppingCart, Menu, X, Heart } from 'lucide-react'
+import { ShoppingCart, Menu, X, Heart, Package } from 'lucide-react'
 import { useCart } from '@/lib/cart-context'
 import { useWishlist } from '@/lib/wishlist-context'
+import { useActiveOrders } from '@/lib/active-orders-context'
 
 export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { items: cartItems } = useCart()
   const { items: wishlistItems } = useWishlist()
+  const { activeOrders } = useActiveOrders()
 
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
   const wishlistCount = wishlistItems.length
+  const latestActiveOrder = activeOrders[activeOrders.length - 1]
 
   const links = [
     { href: '/shop', label: 'Shop' },
@@ -50,6 +53,15 @@ export default function Navigation() {
               {link.label}
             </Link>
           ))}
+          {latestActiveOrder && (
+            <Link
+              href={`/order-tracking/${latestActiveOrder.reference}`}
+              className="flex items-center gap-1.5 text-[#d4a5a5] hover:text-[#c4956f] transition-colors text-sm font-medium"
+            >
+              <Package className="w-4 h-4" />
+              Track Order
+            </Link>
+          )}
         </div>
 
         {/* Action Buttons */}
@@ -99,6 +111,16 @@ export default function Navigation() {
                 {link.label}
               </Link>
             ))}
+            {latestActiveOrder && (
+              <Link
+                href={`/order-tracking/${latestActiveOrder.reference}`}
+                className="flex items-center gap-1.5 text-[#d4a5a5] hover:text-[#c4956f] py-2 font-medium text-sm"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Package className="w-4 h-4" />
+                Track Order
+              </Link>
+            )}
           </div>
         </div>
       )}
