@@ -11,6 +11,7 @@ export default function ShopPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [sortBy, setSortBy] = useState<'featured' | 'newest' | 'price-asc' | 'price-desc'>('featured')
   const [loading, setLoading] = useState(true)
   const { toggle, isSaved } = useWishlist()
 
@@ -30,12 +31,27 @@ export default function ShopPage() {
   }, [])
 
   useEffect(() => {
-    if (selectedCategory === 'all') {
-      setFilteredProducts(products)
-    } else {
-      setFilteredProducts(products.filter(p => p.category === selectedCategory))
+    let result = selectedCategory === 'all'
+      ? [...products]
+      : products.filter(p => p.category === selectedCategory)
+
+    switch (sortBy) {
+      case 'newest':
+        result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        break
+      case 'price-asc':
+        result.sort((a, b) => a.price - b.price)
+        break
+      case 'price-desc':
+        result.sort((a, b) => b.price - a.price)
+        break
+      default:
+        // 'featured' -- featured items first, otherwise leave in catalog order
+        result.sort((a, b) => Number(b.is_featured) - Number(a.is_featured))
     }
-  }, [selectedCategory, products])
+
+    setFilteredProducts(result)
+  }, [selectedCategory, sortBy, products])
 
   const categories = [
     { value: 'all', label: 'All Products' },
@@ -43,6 +59,13 @@ export default function ShopPage() {
     { value: 'gift-boxes', label: 'Gift Boxes' },
     { value: 'occasion-gifts', label: 'Occasion Gifts' },
     { value: 'accessories', label: 'Accessories' },
+  ]
+
+  const sortOptions = [
+    { value: 'featured', label: 'Featured' },
+    { value: 'newest', label: 'Newest' },
+    { value: 'price-asc', label: 'Price: Low to High' },
+    { value: 'price-desc', label: 'Price: High to Low' },
   ]
 
   return (
@@ -88,6 +111,26 @@ export default function ShopPage() {
 
           {/* Products Grid */}
           <div className="md:col-span-3">
+            {!loading && filteredProducts.length > 0 && (
+              <div className="flex items-center justify-between mb-6">
+                <p className="text-sm text-[#8b8b8b]">
+                  {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'}
+                </p>
+                <div className="relative">
+                  <select
+                    style={{ colorScheme: 'light' }}
+                    value={sortBy}
+                    onChange={e => setSortBy(e.target.value as typeof sortBy)}
+                    className="appearance-none pl-4 pr-9 py-2 border border-[#e8dfd9] rounded-lg text-sm focus:outline-none focus:border-[#d4a5a5] text-[#2a2a2a] bg-white cursor-pointer"
+                  >
+                    {sortOptions.map(opt => (
+                      <option key={opt.value} value={opt.value}>Sort: {opt.label}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-[#8b8b8b] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+              </div>
+            )}
             {loading ? (
               <div className="text-center py-12">
                 <p className="text-[#8b8b8b]">Loading products...</p>

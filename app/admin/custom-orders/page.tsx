@@ -38,7 +38,15 @@ export default function AdminCustomOrdersPage() {
 
   const handleStatusChange = async (id: string, newStatus: CustomOrderRequest['status']) => {
     try {
-      const updated = await api.customOrders.update(id, { status: newStatus })
+      const response = await fetch(`/api/custom-orders/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Failed to update status')
+
+      const updated = data.customOrder as CustomOrderRequest
       setRequests(prev => prev.map(r => r.id === id ? updated : r))
       if (selectedRequest?.id === id) {
         setSelectedRequest(updated)

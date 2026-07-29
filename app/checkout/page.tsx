@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { AlertCircle, MessageCircle, PackageCheck } from 'lucide-react'
 import { useCart } from '@/lib/cart-context'
 import { useActiveOrders } from '@/lib/active-orders-context'
+import { DELIVERY_FEE } from '@/lib/constants'
 
 export default function CheckoutPage() {
   const { items, total, clear } = useCart()
@@ -13,7 +14,7 @@ export default function CheckoutPage() {
   const [error, setError] = useState('')
   const [orderResult, setOrderResult] = useState<{ reference: string; whatsappLink: string } | null>(null)
 
-  const deliveryFee = 2000
+  const deliveryFee = DELIVERY_FEE
   const grandTotal = total + deliveryFee
 
   const [formData, setFormData] = useState({
@@ -225,6 +226,7 @@ export default function CheckoutPage() {
                   name="deliveryDate"
                   value={formData.deliveryDate}
                   onChange={handleInputChange}
+                  min={new Date().toISOString().split('T')[0]}
                   required
                   className="w-full px-4 py-2 border border-[#e8dfd9] rounded-lg focus:outline-none focus:border-[#d4a5a5]"
                 />

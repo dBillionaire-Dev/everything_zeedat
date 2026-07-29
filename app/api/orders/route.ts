@@ -3,6 +3,7 @@ import { createServiceRoleClient } from '@/lib/supabase/service-role';
 import { generateOrderReference } from '@/lib/order-reference';
 import { sendOrderConfirmation, sendOrderNotificationToAdmin } from '@/lib/email-service';
 import { generateCustomerOrderWhatsAppLink, generateAdminOrderWhatsAppMessage } from '@/lib/whatsapp-service';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
 interface OrderItemInput {
   name: string;
@@ -13,6 +14,15 @@ interface OrderItemInput {
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIp(request);
+    const rateLimit = await checkRateLimit({ key: `orders:${ip}`, limit: 5, windowMinutes: 15 });
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many orders placed recently. Please try again in a few minutes, or reach out on WhatsApp.' },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
 
     const {

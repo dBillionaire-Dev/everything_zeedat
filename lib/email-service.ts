@@ -20,6 +20,88 @@ export interface CustomOrderEmailData {
   referenceId: string;
 }
 
+// ============================================================================
+// Custom order request status update (sent to the customer whenever an
+// admin changes a request's status)
+// ============================================================================
+
+const CUSTOM_ORDER_STATUS_COPY: Record<string, { label: string; blurb: string }> = {
+  NEW: { label: 'Received', blurb: "We've received your custom gift request and will review it shortly." },
+  REVIEWED: { label: 'Reviewed', blurb: "We've reviewed your request and are working out the details." },
+  QUOTED: { label: 'Quote Ready', blurb: "We've put together a quote for your custom gift! We'll reach out on WhatsApp with the details." },
+  CONFIRMED: { label: 'Confirmed', blurb: "Your custom gift request is confirmed and we're getting started!" },
+  DECLINED: { label: 'Declined', blurb: "Unfortunately we're not able to fulfill this request. Feel free to reach out on WhatsApp if you'd like to discuss alternatives." },
+};
+
+export interface CustomOrderStatusUpdateEmailData {
+  customerName: string;
+  customerEmail?: string | null;
+  referenceId: string;
+  status: string;
+}
+
+export async function sendCustomOrderStatusUpdate(data: CustomOrderStatusUpdateEmailData): Promise<boolean> {
+  if (!data.customerEmail) return false;
+
+  try {
+    const statusInfo = CUSTOM_ORDER_STATUS_COPY[data.status] || { label: data.status, blurb: 'Your request status has been updated.' };
+
+    const html = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #faf8f6; margin: 0; padding: 20px; }
+          .container { max-width: 600px; margin: 0 auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+          .header { background: linear-gradient(135deg, #d4a5a5 0%, #c4956f 100%); color: white; padding: 30px; text-align: center; }
+          .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+          .content { padding: 30px; color: #2a2a2a; }
+          .status-badge { display: inline-block; background-color: #f9f7f4; border-left: 4px solid #d4a5a5; padding: 15px 20px; border-radius: 6px; margin: 20px 0; font-weight: 600; color: #2a2a2a; }
+          .cta-button { display: inline-block; background-color: #25d366; color: white; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; }
+          .footer { background-color: #f9f7f4; padding: 20px; text-align: center; font-size: 12px; color: #8b8b8b; border-top: 1px solid #e8dfd9; }
+          .footer-link { color: #d4a5a5; text-decoration: none; }
+          .reference-id { font-family: monospace; background-color: #faf8f6; padding: 2px 6px; border-radius: 3px; color: #d4a5a5; font-weight: 600; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header"><h1>🎁 Custom Order Update</h1></div>
+          <div class="content">
+            <p>Hi <strong>${data.customerName}</strong>,</p>
+            <p>${statusInfo.blurb}</p>
+
+            <div class="status-badge">
+              Request ${`<span class="reference-id">${data.referenceId}</span>`} is now: ${statusInfo.label}
+            </div>
+
+            <div style="text-align: center; margin: 25px 0;">
+              <a href="https://wa.me/2348131288947?text=${encodeURIComponent(`Hi Zeedat, following up on my custom order request — Reference: ${data.referenceId}`)}" class="cta-button">💬 Message Us on WhatsApp</a>
+            </div>
+          </div>
+          <div class="footer">
+            <p style="margin: 0 0 10px 0;"><strong>Gifts by EverythingZeedat</strong></p>
+            <p style="margin: 0;">📱 WhatsApp: <a href="https://wa.me/2348131288947" class="footer-link">+234 813 128 8947</a> · 📷 <a href="https://instagram.com/gifts.by.everythingzeedat" class="footer-link">@gifts.by.everythingzeedat</a></p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    await transporter.sendMail({
+      from: process.env.GMAIL_EMAIL,
+      to: data.customerEmail,
+      subject: `Custom Order Update: ${statusInfo.label} - Reference: ${data.referenceId}`,
+      html,
+    });
+
+    console.log(`[v0] Custom order status update email sent for ${data.referenceId}`);
+    return true;
+  } catch (error) {
+    console.error('[v0] Custom order status update email failed:', error);
+    return false;
+  }
+}
 // Generate HTML email with form snapshot
 function generateEmailHTML(data: CustomOrderEmailData): string {
   const budgetLabels: Record<string, string> = {

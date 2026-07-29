@@ -292,6 +292,7 @@ export default function CustomOrdersPage() {
                   name="preferredDeliveryDate"
                   value={formData.preferredDeliveryDate}
                   onChange={handleInputChange}
+                  min={new Date().toISOString().split('T')[0]}
                   className="w-full px-4 py-2 border border-[#e8dfd9] rounded-lg focus:outline-none focus:border-[#d4a5a5]"
                 />
               </div>
