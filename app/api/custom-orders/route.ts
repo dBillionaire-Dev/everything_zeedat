@@ -2,9 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
 import { sendCustomOrderConfirmation, sendCustomOrderNotificationToAdmin } from '@/lib/email-service';
 import { generateAdminWhatsAppMessage } from '@/lib/whatsapp-service';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIp(request);
+    const rateLimit = await checkRateLimit({ key: `custom-orders:${ip}`, limit: 5, windowMinutes: 15 });
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests submitted recently. Please try again in a few minutes, or reach out on WhatsApp.' },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     
     const {

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Phone, Mail, MapPin } from 'lucide-react'
+import { Phone, Camera, MapPin } from 'lucide-react'
 
 export default function ContactPage() {
   return (
@@ -43,7 +43,7 @@ export default function ContactPage() {
 
               <div className="flex gap-4">
                 <div className="w-12 h-12 bg-[#e8d4d4] rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Mail className="w-6 h-6 text-[#d4a5a5]" />
+                  <Camera className="w-6 h-6 text-[#d4a5a5]" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-[#2a2a2a] mb-1">Instagram</h3>

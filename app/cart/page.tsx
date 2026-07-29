@@ -4,11 +4,12 @@ import Link from 'next/link'
 import { ArrowLeft, Trash2, Plus, Minus, Heart } from 'lucide-react'
 import { useCart } from '@/lib/cart-context'
 import { useWishlist } from '@/lib/wishlist-context'
+import { DELIVERY_FEE } from '@/lib/constants'
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, total } = useCart()
   const { toggle, isSaved } = useWishlist()
-  const deliveryFee = 2000
+  const deliveryFee = DELIVERY_FEE
   const grandTotal = total + deliveryFee
 
   return (

@@ -6,7 +6,15 @@ import { Package, MessageSquare, Settings } from 'lucide-react'
 import { api } from '@/lib/api'
 
 export default function AdminPage() {
-  const [stats, setStats] = useState({ orders: 0, customOrders: 0, products: 0 })
+  const [stats, setStats] = useState({
+    orders: 0,
+    ordersAwaitingConfirmation: 0,
+    ordersUnpaid: 0,
+    customOrders: 0,
+    customOrdersNew: 0,
+    products: 0,
+    productsNeedingAttention: 0,
+  })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -20,8 +28,12 @@ export default function AdminPage() {
 
         setStats({
           orders: ordersData.length,
+          ordersAwaitingConfirmation: ordersData.filter(o => o.status === 'RECEIVED').length,
+          ordersUnpaid: ordersData.filter(o => o.payment_status !== 'PAID').length,
           customOrders: customOrdersData.length,
+          customOrdersNew: customOrdersData.filter(r => r.status === 'NEW').length,
           products: productsData.length,
+          productsNeedingAttention: productsData.filter(p => p.stock_status !== 'in-stock').length,
         })
       } catch (error) {
         console.error('Error fetching stats:', error)
@@ -48,35 +60,59 @@ export default function AdminPage() {
       <div className="max-w-7xl mx-auto px-4 py-12">
         {/* Stats */}
         <div className="grid md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-white rounded-xl p-6 border border-[#e8dfd9]">
+          <Link href="/admin/orders" className="bg-white rounded-xl p-6 border border-[#e8dfd9] hover:border-[#d4a5a5] transition-colors">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[#8b8b8b] text-sm">Total Orders</p>
                 <p className="text-4xl font-bold text-[#2a2a2a] mt-2">{stats.orders}</p>
+                {!loading && (stats.ordersAwaitingConfirmation > 0 || stats.ordersUnpaid > 0) && (
+                  <div className="mt-3 space-y-1">
+                    {stats.ordersAwaitingConfirmation > 0 && (
+                      <p className="text-xs font-medium text-orange-700 bg-orange-50 inline-block px-2 py-1 rounded-full mr-1">
+                        {stats.ordersAwaitingConfirmation} awaiting confirmation
+                      </p>
+                    )}
+                    {stats.ordersUnpaid > 0 && (
+                      <p className="text-xs font-medium text-red-700 bg-red-50 inline-block px-2 py-1 rounded-full">
+                        {stats.ordersUnpaid} unpaid
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
-              <Package className="w-12 h-12 text-[#d4a5a5] opacity-20" />
+              <Package className="w-12 h-12 text-[#d4a5a5] opacity-20 flex-shrink-0" />
             </div>
-          </div>
+          </Link>
 
-          <div className="bg-white rounded-xl p-6 border border-[#e8dfd9]">
+          <Link href="/admin/custom-orders" className="bg-white rounded-xl p-6 border border-[#e8dfd9] hover:border-[#d4a5a5] transition-colors">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[#8b8b8b] text-sm">Custom Requests</p>
                 <p className="text-4xl font-bold text-[#2a2a2a] mt-2">{stats.customOrders}</p>
+                {!loading && stats.customOrdersNew > 0 && (
+                  <p className="mt-3 text-xs font-medium text-blue-700 bg-blue-50 inline-block px-2 py-1 rounded-full">
+                    {stats.customOrdersNew} new
+                  </p>
+                )}
               </div>
-              <MessageSquare className="w-12 h-12 text-[#d4a5a5] opacity-20" />
+              <MessageSquare className="w-12 h-12 text-[#d4a5a5] opacity-20 flex-shrink-0" />
             </div>
-          </div>
+          </Link>
 
-          <div className="bg-white rounded-xl p-6 border border-[#e8dfd9]">
+          <Link href="/admin/products" className="bg-white rounded-xl p-6 border border-[#e8dfd9] hover:border-[#d4a5a5] transition-colors">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[#8b8b8b] text-sm">Products</p>
                 <p className="text-4xl font-bold text-[#2a2a2a] mt-2">{stats.products}</p>
+                {!loading && stats.productsNeedingAttention > 0 && (
+                  <p className="mt-3 text-xs font-medium text-yellow-700 bg-yellow-50 inline-block px-2 py-1 rounded-full">
+                    {stats.productsNeedingAttention} low/out of stock
+                  </p>
+                )}
               </div>
-              <Settings className="w-12 h-12 text-[#d4a5a5] opacity-20" />
+              <Settings className="w-12 h-12 text-[#d4a5a5] opacity-20 flex-shrink-0" />
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Navigation Grid */}
