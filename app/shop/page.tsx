@@ -190,7 +190,7 @@ export default function ShopPage() {
                         </div>
                         {product.is_customizable && (
                           <p className="text-xs text-[#d4a5a5] mt-2 font-medium">
-                            Customizable available
+                            Customization available
                           </p>
                         )}
                       </div>
