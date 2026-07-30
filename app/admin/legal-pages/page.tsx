@@ -35,7 +35,7 @@ export default function AdminLegalPagesPage() {
         setPages(pagesMap)
         setDrafts(draftsMap)
       } catch (error) {
-        console.error('[v0] Error loading legal pages:', error)
+        console.error('Error loading legal pages:', error)
       } finally {
         setLoading(false)
       }
@@ -56,7 +56,7 @@ export default function AdminLegalPagesPage() {
       setSavedSlug(activeSlug)
       setTimeout(() => setSavedSlug(null), 3000)
     } catch (error) {
-      console.error('[v0] Error saving legal page:', error)
+      console.error('Error saving legal page:', error)
     } finally {
       setSaving(false)
     }

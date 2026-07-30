@@ -30,7 +30,7 @@ export default function ProductPage() {
         const data = await api.products.getBySlug(slug)
         setProduct(data)
       } catch (error) {
-        console.error('[v0] Error fetching product:', error)
+        console.error('Error fetching product:', error)
       } finally {
         setLoading(false)
       }

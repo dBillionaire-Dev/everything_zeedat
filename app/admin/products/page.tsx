@@ -18,7 +18,7 @@ export default function AdminProductsPage() {
       const data = await api.products.list()
       setProducts(data)
     } catch (error) {
-      console.error('[v0] Error fetching products:', error)
+      console.error('Error fetching products:', error)
     } finally {
       setLoading(false)
     }
@@ -34,7 +34,7 @@ export default function AdminProductsPage() {
       await api.products.remove(id)
       setProducts(prev => prev.filter(p => p.id !== id))
     } catch (error) {
-      console.error('[v0] Error deleting product:', error)
+      console.error('Error deleting product:', error)
     } finally {
       setDeletingId(null)
       setConfirmingId(null)

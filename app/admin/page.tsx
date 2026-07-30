@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Package, MessageSquare, Settings, FileText } from 'lucide-react'
+import { Package, MessageSquare, Settings, FileText, Star } from 'lucide-react'
 import { api } from '@/lib/api'
 
 export default function AdminPage() {
@@ -151,6 +151,15 @@ export default function AdminPage() {
             <FileText className="w-8 h-8 text-[#d4a5a5] mb-4 group-hover:scale-110 transition-transform" />
             <h3 className="text-xl font-serif font-semibold text-[#2a2a2a] mb-2">Legal Pages</h3>
             <p className="text-[#8b8b8b]">Edit your Privacy Policy, Terms, and Refund Policy</p>
+          </Link>
+
+          <Link
+            href="/admin/reviews"
+            className="bg-white rounded-xl p-8 border border-[#e8dfd9] hover:border-[#d4a5a5] transition-colors group"
+          >
+            <Star className="w-8 h-8 text-[#d4a5a5] mb-4 group-hover:scale-110 transition-transform" />
+            <h3 className="text-xl font-serif font-semibold text-[#2a2a2a] mb-2">Reviews & Ratings</h3>
+            <p className="text-[#8b8b8b]">Toggle submissions, and hide, feature, or delete reviews</p>
           </Link>
         </div>
 

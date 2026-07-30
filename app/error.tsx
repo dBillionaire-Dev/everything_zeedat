@@ -25,7 +25,7 @@ export default function Error({
           Something went wrong
         </h1>
         <p className="text-[#8b8b8b] mb-8">
-          Sorry about that, an unexpected error occurred. You can try again, or head back home.
+          Sorry about that — an unexpected error occurred. You can try again, or head back home.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">

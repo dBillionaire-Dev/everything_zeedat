@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { ShoppingCart, Menu, X, Heart, Package } from 'lucide-react'
 import { useCart } from '@/lib/cart-context'
 import { useWishlist } from '@/lib/wishlist-context'
-import { useActiveOrders } from '@/lib/active-orders-context'
+import { useActiveOrders, trackingPath } from '@/lib/active-orders-context'
 
 export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -55,7 +55,7 @@ export default function Navigation() {
           ))}
           {latestActiveOrder && (
             <Link
-              href={`/order-tracking/${latestActiveOrder.reference}`}
+              href={trackingPath(latestActiveOrder)}
               className="flex items-center gap-1.5 text-[#d4a5a5] hover:text-[#c4956f] transition-colors text-sm font-medium"
             >
               <Package className="w-4 h-4" />
@@ -113,7 +113,7 @@ export default function Navigation() {
             ))}
             {latestActiveOrder && (
               <Link
-                href={`/order-tracking/${latestActiveOrder.reference}`}
+                href={trackingPath(latestActiveOrder)}
                 className="flex items-center gap-1.5 text-[#d4a5a5] hover:text-[#c4956f] py-2 font-medium text-sm"
                 onClick={() => setMobileMenuOpen(false)}
               >

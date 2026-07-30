@@ -78,11 +78,11 @@ export default function CheckoutPage() {
       if (!response.ok) throw new Error(data.error || 'Failed to place order')
 
       clear()
-      addActiveOrder(data.reference, formData.phone)
+      addActiveOrder('order', data.reference, formData.phone)
       setOrderResult({ reference: data.reference, whatsappLink: data.whatsappLink })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create order. Please try again.')
-      console.error('[v0] Checkout error:', err)
+      console.error('Checkout error:', err)
     } finally {
       setLoading(false)
     }

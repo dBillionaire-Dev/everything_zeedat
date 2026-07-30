@@ -10,7 +10,10 @@ const statusColors: Record<string, string> = {
   'NEW': 'bg-blue-100 text-blue-800',
   'REVIEWED': 'bg-purple-100 text-purple-800',
   'QUOTED': 'bg-yellow-100 text-yellow-800',
-  'CONFIRMED': 'bg-green-100 text-green-800',
+  'CONFIRMED': 'bg-purple-100 text-purple-800',
+  'PREPARING': 'bg-yellow-100 text-yellow-800',
+  'OUT_FOR_DELIVERY': 'bg-orange-100 text-orange-800',
+  'DELIVERED': 'bg-green-100 text-green-800',
   'DECLINED': 'bg-red-100 text-red-800',
 }
 
@@ -28,7 +31,7 @@ export default function AdminCustomOrdersPage() {
         const data = await api.customOrders.list()
         setRequests(data)
       } catch (error) {
-        console.error('[v0] Error fetching custom orders:', error)
+        console.error('Error fetching custom orders:', error)
       } finally {
         setLoading(false)
       }
@@ -52,7 +55,7 @@ export default function AdminCustomOrdersPage() {
         setSelectedRequest(updated)
       }
     } catch (error) {
-      console.error('[v0] Error updating request:', error)
+      console.error('Error updating request:', error)
     }
   }
 
@@ -65,7 +68,7 @@ export default function AdminCustomOrdersPage() {
         setAdminNotes(notes)
       }
     } catch (error) {
-      console.error('[v0] Error updating notes:', error)
+      console.error('Error updating notes:', error)
     }
   }
 
@@ -78,7 +81,7 @@ export default function AdminCustomOrdersPage() {
         setSelectedRequest(null)
       }
     } catch (error) {
-      console.error('[v0] Error deleting request:', error)
+      console.error('Error deleting request:', error)
     } finally {
       setDeleting(false)
       setConfirmingDelete(false)
@@ -195,6 +198,9 @@ export default function AdminCustomOrdersPage() {
                       <option value="REVIEWED">Reviewed</option>
                       <option value="QUOTED">Quoted</option>
                       <option value="CONFIRMED">Confirmed</option>
+                      <option value="PREPARING">Preparing</option>
+                      <option value="OUT_FOR_DELIVERY">Out for Delivery</option>
+                      <option value="DELIVERED">Delivered</option>
                       <option value="DECLINED">Declined</option>
                     </select>
                   </div>

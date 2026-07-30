@@ -3,6 +3,7 @@ import { createServiceRoleClient } from '@/lib/supabase/service-role';
 import { sendCustomOrderConfirmation, sendCustomOrderNotificationToAdmin } from '@/lib/email-service';
 import { generateAdminWhatsAppMessage } from '@/lib/whatsapp-service';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
+import { generateCustomOrderReference } from '@/lib/order-reference';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-
+    
     const {
       customerName,
       customerEmail,
@@ -38,11 +39,13 @@ export async function POST(request: NextRequest) {
 
     // Create custom order in Supabase
     const supabase = createServiceRoleClient();
+    const referenceId = generateCustomOrderReference();
 
     const { data, error } = await supabase
       .from('custom_order_requests')
       .insert([
         {
+          reference: referenceId,
           customer_name: customerName,
           phone: customerPhone,
           email: customerEmail,
@@ -61,9 +64,6 @@ export async function POST(request: NextRequest) {
       console.error('Supabase error:', error);
       throw error;
     }
-
-    // Generate reference ID from database ID
-    const referenceId = `CO-${data.id.slice(0, 8).toUpperCase()}`;
 
     // Best-effort notifications — the request is already saved above, so a
     // flaky email provider (e.g. missing/expired Gmail app password)
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('API error:', error);
     return NextResponse.json(
-      {
+      { 
         error: 'Failed to submit custom order request. Please try again or contact us via WhatsApp.',
         details: error instanceof Error ? error.message : 'Unknown error'
       },

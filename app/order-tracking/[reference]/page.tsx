@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircle, Package, Truck, ArrowLeft, AlertCircle, Lock } from 'lucide-react'
+import { CheckCircle, Package, Truck, ArrowLeft, AlertCircle, Lock, XCircle } from 'lucide-react'
 import { api } from '@/lib/api'
 import type { Order } from '@/lib/api'
 import { useActiveOrders } from '@/lib/active-orders-context'
@@ -33,7 +33,7 @@ export default function OrderTrackingPage() {
   // customer doesn't have to retype it, but the server-side RPC still
   // requires it to match before returning anything.
   useEffect(() => {
-    const match = activeOrders.find(o => o.reference === reference)
+    const match = activeOrders.find(o => o.type === 'order' && o.reference === reference)
     if (match) setPhone(match.phone)
   }, [activeOrders, reference])
 
@@ -117,6 +117,7 @@ export default function OrderTrackingPage() {
     )
   }
 
+  const isCancelled = order.status === 'CANCELLED'
   const currentStepIndex = statusSteps.findIndex(s => s.status === order.status)
 
   return (
@@ -171,12 +172,23 @@ export default function OrderTrackingPage() {
         </div>
 
         {/* Status Timeline */}
+        {isCancelled ? (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-8 mb-8 text-center">
+            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+              <XCircle className="w-6 h-6 text-red-600" />
+            </div>
+            <h2 className="font-serif font-semibold text-xl text-[#2a2a2a] mb-2">Order Cancelled</h2>
+            <p className="text-[#8b8b8b]">
+              This order has been cancelled. Reach out on WhatsApp if you have any questions.
+            </p>
+          </div>
+        ) : (
         <div className="bg-white rounded-xl border border-[#e8dfd9] p-8 mb-8">
           <h2 className="font-serif font-semibold text-xl text-[#2a2a2a] mb-8">Order Status</h2>
           <div className="space-y-6">
             {statusSteps.map((step, idx) => {
               const Icon = step.icon
-              const isCompleted = idx <= currentStepIndex
+              const isCompleted = currentStepIndex >= 0 && idx <= currentStepIndex
               const isCurrent = idx === currentStepIndex
 
               return (
@@ -217,6 +229,7 @@ export default function OrderTrackingPage() {
             })}
           </div>
         </div>
+        )}
 
         {/* Delivery Details */}
         <div className="grid md:grid-cols-2 gap-8">
