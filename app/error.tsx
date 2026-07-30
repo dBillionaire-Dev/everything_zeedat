@@ -12,7 +12,7 @@ export default function Error({
   reset: () => void
 }) {
   useEffect(() => {
-    console.error('[v0] Unhandled error:', error)
+    console.error('Unhandled error:', error)
   }, [error])
 
   return (
