@@ -1,6 +1,8 @@
 // WhatsApp notification service
 // This generates WhatsApp message templates with order details
 
+import { WHATSAPP_NUMBER } from './constants';
+
 export interface WhatsAppMessageData {
   customerName: string;
   customerPhone: string;
@@ -122,7 +124,7 @@ Looking forward to confirming payment and details with you! 💝
 }
 
 export function generateCustomerOrderWhatsAppLink(data: OrderWhatsAppMessageData): string {
-  return generateWhatsAppLink('2348131288947', generateCustomerOrderWhatsAppMessage(data));
+  return generateWhatsAppLink(WHATSAPP_NUMBER, generateCustomerOrderWhatsAppMessage(data));
 }
 
 /** Internal message logged for admin visibility (mirrors the custom-order pattern). */

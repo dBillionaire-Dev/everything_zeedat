@@ -1,14 +1,13 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { AlertCircle, CheckCircle, ImagePlus, X, Loader2 } from 'lucide-react'
 import { api } from '@/lib/api'
 import { uploadReferenceImage, UploadError } from '@/lib/upload'
+import { WHATSAPP_NUMBER } from '@/lib/constants'
 
 export default function CustomOrdersPage() {
-  const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -101,7 +100,6 @@ export default function CustomOrdersPage() {
       setSubmitted(true)
       // Store reference ID for display
       localStorage.setItem('lastOrderReference', data.referenceId)
-      setTimeout(() => router.push('/'), 3000)
     } catch (err) {
       setError(
         err instanceof Error
@@ -165,7 +163,7 @@ export default function CustomOrdersPage() {
           </div>
 
           <a
-            href="https://wa.me/2348131288947"
+            href={`https://wa.me/${WHATSAPP_NUMBER}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block w-full bg-[#25d366] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#1fa857] transition-colors mb-3"
@@ -173,7 +171,12 @@ export default function CustomOrdersPage() {
             💬 Message on WhatsApp
           </a>
 
-          <p className="text-xs text-[#8b8b8b]">Redirecting to home in a moment...</p>
+          <Link
+            href="/"
+            className="inline-block w-full border border-[#e8dfd9] text-[#2a2a2a] px-4 py-2 rounded-lg font-medium hover:bg-[#f9f7f4] transition-colors"
+          >
+            Back to Home
+          </Link>
         </div>
       </div>
     )

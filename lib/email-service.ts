@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { WHATSAPP_NUMBER, WHATSAPP_DISPLAY, INSTAGRAM_URL, INSTAGRAM_HANDLE } from './constants';
 
 // Initialize Gmail transporter
 const transporter = nodemailer.createTransport({
@@ -76,12 +77,12 @@ export async function sendCustomOrderStatusUpdate(data: CustomOrderStatusUpdateE
             </div>
 
             <div style="text-align: center; margin: 25px 0;">
-              <a href="https://wa.me/2348131288947?text=${encodeURIComponent(`Hi Zeedat, following up on my custom order request — Reference: ${data.referenceId}`)}" class="cta-button">💬 Message Us on WhatsApp</a>
+              <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi Zeedat, following up on my custom order request — Reference: ${data.referenceId}`)}" class="cta-button">💬 Message Us on WhatsApp</a>
             </div>
           </div>
           <div class="footer">
             <p style="margin: 0 0 10px 0;"><strong>Gifts by EverythingZeedat</strong></p>
-            <p style="margin: 0;">📱 WhatsApp: <a href="https://wa.me/2348131288947" class="footer-link">+234 813 128 8947</a> · 📷 <a href="https://instagram.com/gifts.by.everythingzeedat" class="footer-link">@gifts.by.everythingzeedat</a></p>
+            <p style="margin: 0;">📱 WhatsApp: <a href="https://wa.me/${WHATSAPP_NUMBER}" class="footer-link">${WHATSAPP_DISPLAY}</a> · 📷 <a href="${INSTAGRAM_URL}" class="footer-link">${INSTAGRAM_HANDLE}</a></p>
           </div>
         </div>
       </body>
@@ -273,7 +274,7 @@ function generateEmailHTML(data: CustomOrderEmailData): string {
             <p style="margin: 0 0 15px 0; font-size: 14px; color: #666;">
               Need to reach us faster? Connect via WhatsApp:
             </p>
-            <a href="https://wa.me/2348131288947?text=Hi%20Zeedat%2C%20I%20submitted%20a%20custom%20order%20request%20with%20ID%3A%20${data.referenceId}" class="cta-button" style="background-color: #25d366;">
+            <a href="https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20Zeedat%2C%20I%20submitted%20a%20custom%20order%20request%20with%20ID%3A%20${data.referenceId}" class="cta-button" style="background-color: #25d366;">
               💬 Message us on WhatsApp
             </a>
           </div>
@@ -288,8 +289,8 @@ function generateEmailHTML(data: CustomOrderEmailData): string {
             <strong>Gifts by EverythingZeedat</strong>
           </p>
           <p style="margin: 0 0 10px 0;">
-            📱 WhatsApp: <a href="https://wa.me/2348131288947" class="footer-link">+234 813 128 8947</a><br>
-            📷 Instagram: <a href="https://instagram.com/gifts.by.everythingzeedat" class="footer-link">@gifts.by.everythingzeedat</a>
+            📱 WhatsApp: <a href="https://wa.me/${WHATSAPP_NUMBER}" class="footer-link">${WHATSAPP_DISPLAY}</a><br>
+            📷 Instagram: <a href="${INSTAGRAM_URL}" class="footer-link">${INSTAGRAM_HANDLE}</a>
           </p>
           <p style="margin: 0; font-size: 11px;">
             This is an automated email. Please do not reply to this email. Use WhatsApp for inquiries.
@@ -487,14 +488,14 @@ export async function sendOrderConfirmation(data: OrderEmailData): Promise<boole
 
             <div style="text-align: center; margin: 25px 0;">
               <p style="margin: 0 0 15px 0; font-size: 14px; color: #666;">Confirm your order and payment details on WhatsApp:</p>
-              <a href="https://wa.me/2348131288947?text=${encodeURIComponent(`Hi Zeedat, I placed an order — Reference: ${data.reference}`)}" class="cta-button">💬 Confirm on WhatsApp</a>
+              <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi Zeedat, I placed an order — Reference: ${data.reference}`)}" class="cta-button">💬 Confirm on WhatsApp</a>
             </div>
 
             <p style="font-size: 13px; color: #8b8b8b;">You can track your order any time using your reference number and phone number at any point on our site's Order Tracking page.</p>
           </div>
           <div class="footer">
             <p style="margin: 0 0 10px 0;"><strong>Gifts by EverythingZeedat</strong></p>
-            <p style="margin: 0;">📱 WhatsApp: <a href="https://wa.me/2348131288947" class="footer-link">+234 813 128 8947</a> · 📷 <a href="https://instagram.com/gifts.by.everythingzeedat" class="footer-link">@gifts.by.everythingzeedat</a></p>
+            <p style="margin: 0;">📱 WhatsApp: <a href="https://wa.me/${WHATSAPP_NUMBER}" class="footer-link">${WHATSAPP_DISPLAY}</a> · 📷 <a href="${INSTAGRAM_URL}" class="footer-link">${INSTAGRAM_HANDLE}</a></p>
           </div>
         </div>
       </body>
@@ -645,7 +646,7 @@ export async function sendOrderStatusUpdate(data: OrderStatusUpdateEmailData): P
           </div>
           <div class="footer">
             <p style="margin: 0 0 10px 0;"><strong>Gifts by EverythingZeedat</strong></p>
-            <p style="margin: 0;">📱 WhatsApp: <a href="https://wa.me/2348131288947" class="footer-link">+234 813 128 8947</a> · 📷 <a href="https://instagram.com/gifts.by.everythingzeedat" class="footer-link">@gifts.by.everythingzeedat</a></p>
+            <p style="margin: 0;">📱 WhatsApp: <a href="https://wa.me/${WHATSAPP_NUMBER}" class="footer-link">${WHATSAPP_DISPLAY}</a> · 📷 <a href="${INSTAGRAM_URL}" class="footer-link">${INSTAGRAM_HANDLE}</a></p>
           </div>
         </div>
       </body>

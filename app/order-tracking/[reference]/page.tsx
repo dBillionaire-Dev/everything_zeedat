@@ -7,6 +7,7 @@ import { CheckCircle, Package, Truck, ArrowLeft, AlertCircle, Lock } from 'lucid
 import { api } from '@/lib/api'
 import type { Order } from '@/lib/api'
 import { useActiveOrders } from '@/lib/active-orders-context'
+import { buildWhatsAppLink } from '@/lib/constants'
 
 const statusSteps = [
   { status: 'RECEIVED', label: 'Order Received', icon: CheckCircle },
@@ -256,7 +257,7 @@ export default function OrderTrackingPage() {
             Have questions about your order?
           </p>
           <a
-            href={`https://wa.me/2348131288947?text=Hi!%20I%20have%20a%20question%20about%20my%20order%20${order.reference}.`}
+            href={buildWhatsAppLink(`Hi! I have a question about my order ${order.reference}.`)}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block bg-[#25D366] text-white px-6 py-2 rounded-lg font-medium hover:bg-[#1fa855] transition-colors"
