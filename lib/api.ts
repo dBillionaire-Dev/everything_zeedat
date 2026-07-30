@@ -65,6 +65,7 @@ export interface Order {
 
 export interface CustomOrderRequest {
   id: string;
+  reference: string;
   customer_name: string;
   phone: string;
   email: string | null;
@@ -73,7 +74,7 @@ export interface CustomOrderRequest {
   description: string;
   reference_image_url: string | null;
   preferred_delivery_date: string | null;
-  status: 'NEW' | 'REVIEWED' | 'QUOTED' | 'CONFIRMED' | 'DECLINED';
+  status: 'NEW' | 'REVIEWED' | 'QUOTED' | 'CONFIRMED' | 'PREPARING' | 'OUT_FOR_DELIVERY' | 'DELIVERED' | 'DECLINED';
   admin_notes: string | null;
   created_at: string;
   updated_at: string;
@@ -84,6 +85,23 @@ export interface LegalPage {
   slug: 'privacy' | 'terms' | 'refund-policy';
   title: string;
   content: string;
+  updated_at: string;
+}
+
+export interface Review {
+  id: string;
+  name: string;
+  email: string;
+  rating: number;
+  review_text: string;
+  is_visible: boolean;
+  is_featured: boolean;
+  created_at: string;
+}
+
+export interface SiteSettings {
+  id: string;
+  reviews_submission_enabled: boolean;
   updated_at: string;
 }
 
@@ -283,6 +301,17 @@ export const api = {
   },
 
   customOrders: {
+    async getByReference(reference: string, phone: string) {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .rpc('get_custom_order_by_reference', { p_reference: reference, p_phone: phone })
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) throw new Error('Request not found. Check your reference number and phone number.');
+      return data as unknown as CustomOrderRequest;
+    },
+
     async create(
       request: Omit<CustomOrderRequest, 'id' | 'created_at' | 'updated_at' | 'status' | 'admin_notes'>
     ) {
@@ -355,6 +384,95 @@ export const api = {
 
       if (error) throw error;
       return data as LegalPage;
+    },
+  },
+
+  reviews: {
+    // Same query works for both the public homepage and the admin
+    // dashboard -- RLS decides how much comes back based on who's asking
+    // (see scripts/008_reviews.sql).
+    async list() {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data as Review[];
+    },
+
+    async create(review: { name: string; email: string; rating: number; review_text: string }) {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('reviews')
+        .insert([review])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as Review;
+    },
+
+    // Deliberately narrow: only ever toggles visibility/featured, never the
+    // review content itself -- there's no "edit a review" feature by design.
+    async setVisibility(id: string, is_visible: boolean) {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('reviews')
+        .update({ is_visible })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as Review;
+    },
+
+    async setFeatured(id: string, is_featured: boolean) {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('reviews')
+        .update({ is_featured })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as Review;
+    },
+
+    async remove(id: string) {
+      const supabase = createClient();
+      const { error } = await supabase.from('reviews').delete().eq('id', id);
+      if (error) throw error;
+    },
+  },
+
+  siteSettings: {
+    async get() {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('*')
+        .limit(1)
+        .single();
+
+      if (error) throw error;
+      return data as SiteSettings;
+    },
+
+    async setReviewsSubmissionEnabled(id: string, enabled: boolean) {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('site_settings')
+        .update({ reviews_submission_enabled: enabled, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as SiteSettings;
     },
   },
 }

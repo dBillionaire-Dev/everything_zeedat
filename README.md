@@ -79,47 +79,100 @@ See **QUICKSTART.md** for detailed setup instructions.
 
 ```
 /app
-  ├── page.tsx                    # Home page
+  ├── page.tsx                              # Home page (featured products, reviews section)
+  ├── layout.tsx                            # Root layout (nav, footer, providers, SEO metadata)
+  ├── globals.css                           # Tailwind + design tokens
+  ├── error.tsx                             # Branded error boundary
+  ├── not-found.tsx                         # Branded 404 page
+  ├── sitemap.ts                            # Dynamic sitemap.xml (includes all products)
+  ├── robots.ts                             # Dynamic robots.txt
+  │
   ├── shop/
-  │   ├── page.tsx               # Product listing
-  │   └── [slug]/page.tsx         # Product detail
-  ├── cart/page.tsx              # Shopping cart
-  ├── checkout/page.tsx          # Checkout flow
-  ├── custom-orders/page.tsx      # Custom order form
-  ├── order-tracking/[ref]/       # Order tracking
-  ├── about/page.tsx             # About page
-  ├── contact/page.tsx           # Contact page
+  │   ├── page.tsx                          # Product listing (filter + sort)
+  │   └── [slug]/page.tsx                   # Product detail (customization, gallery)
+  ├── cart/page.tsx                         # Shopping cart
+  ├── checkout/page.tsx                     # Guest checkout (WhatsApp confirmation flow)
+  ├── wishlist/page.tsx                     # Saved items (localStorage-based, no account)
+  │
+  ├── custom-orders/page.tsx                # Custom gift request form
+  ├── custom-order-tracking/[reference]/    # Custom order tracking (phone-gated)
+  ├── order-tracking/[reference]/           # Regular order tracking (phone-gated)
+  │
+  ├── about/page.tsx
+  ├── contact/page.tsx
+  ├── privacy/page.tsx                      # Renders from `legal_pages` table
+  ├── terms/page.tsx                        # Renders from `legal_pages` table
+  ├── refund-policy/page.tsx                # Renders from `legal_pages` table
+  │
   ├── admin/
-  │   ├── page.tsx               # Admin dashboard
-  │   ├── orders/page.tsx        # Orders management
-  │   ├── custom-orders/page.tsx # Custom requests
-  │   └── products/page.tsx      # Products management
-  ├── api/
-  │   └── custom-orders/route.ts # Order submission API
-  ├── layout.tsx
-  └── globals.css
+  │   ├── layout.tsx                        # Server-side admin auth check
+  │   ├── login/page.tsx                    # Admin sign-in
+  │   ├── page.tsx                          # Dashboard (stats + quick links)
+  │   ├── orders/page.tsx                   # Orders: status, payment confirmation, delete
+  │   ├── custom-orders/page.tsx            # Custom requests: status, notes, delete
+  │   ├── products/
+  │   │   ├── page.tsx                      # Product list (add/edit/delete)
+  │   │   ├── new/page.tsx
+  │   │   └── [id]/edit/page.tsx
+  │   ├── legal-pages/page.tsx              # Edit Privacy/Terms/Refund content + preview
+  │   └── reviews/page.tsx                  # Toggle submissions; hide/feature/delete reviews
+  │
+  └── api/
+      ├── orders/
+      │   ├── route.ts                      # POST: guest checkout (rate-limited)
+      │   └── [id]/status/route.ts          # PATCH: admin-only status/payment update + email
+      └── custom-orders/
+          ├── route.ts                      # POST: custom request submission (rate-limited)
+          └── [id]/status/route.ts          # PATCH: admin-only status update + email
 
 /lib
-  ├── api.ts                     # Supabase client
-  ├── cart-context.tsx           # Cart state management
-  ├── email-service.ts           # Gmail SMTP
-  ├── whatsapp-service.ts        # WhatsApp messages
+  ├── api.ts                                # All Supabase queries (products, orders, reviews, etc.)
+  ├── constants.ts                          # WhatsApp/Instagram/delivery-fee constants
+  ├── order-reference.ts                    # Reference-number generators (server-safe)
+  ├── rate-limit.ts                         # Supabase-backed rate limiting for guest writes
+  ├── upload.ts                             # Image upload helper (product + custom-order photos)
+  ├── email-service.ts                      # Nodemailer/Gmail templates + senders
+  ├── whatsapp-service.ts                   # wa.me link/message generators
+  ├── cart-context.tsx                      # Cart state (localStorage-persisted)
+  ├── wishlist-context.tsx                  # Wishlist state (localStorage-persisted)
+  ├── active-orders-context.tsx             # Tracks "Track Order" button visibility per device
   └── supabase/
-      ├── client.ts
-      ├── server.ts
-      └── proxy.ts
+      ├── client.ts                         # Browser (anon key) client
+      ├── server.ts                         # Server (cookie/session-aware) client
+      ├── service-role.ts                   # Server-only client, bypasses RLS for guest writes
+      └── proxy.ts                          # Session refresh helper used by proxy.ts (root)
 
 /components
-  └── navigation.tsx             # Header/nav component
+  ├── navigation.tsx                        # Header nav (cart/wishlist/track-order badges)
+  ├── footer.tsx                            # Site-wide footer
+  ├── admin-top-bar.tsx                     # Admin sign-out bar
+  ├── admin-product-form.tsx                # Shared create/edit product form
+  ├── legal-page-layout.tsx                 # Shared wrapper for Privacy/Terms/Refund pages
+  ├── legal-page-content.tsx                # Fetches + renders a legal page by slug
+  ├── legal-content-renderer.tsx            # Parses the simple ## / - / paragraph format
+  ├── reviews-section.tsx                   # Homepage reviews grid + "See More"
+  ├── leave-rating-button.tsx               # Floating rating button + submission modal
+  ├── star-rating.tsx                       # Star display + interactive star input
+  └── ui/button.tsx                         # shadcn primitive (mostly unused; plain HTML buttons elsewhere)
+
+/scripts                                    # Run in order, once, in the Supabase SQL editor
+  ├── 001_create_schema.sql                 # Core tables: products, orders, order_items, custom_order_requests
+  ├── 002_admin_auth_and_security.sql       # admin_users allowlist + RLS lockdown
+  ├── 003_order_tracking_phone_and_product_images.sql
+  ├── 004_custom_order_delete_policy.sql
+  ├── 005_rate_limiting.sql                 # rate_limit_hits table
+  ├── 006_legal_pages.sql                   # legal_pages table + seed content
+  ├── 007_custom_order_tracking.sql         # reference column + expanded status lifecycle
+  └── 008_reviews.sql                       # reviews + site_settings tables
 
 /public
-  └── [assets]
+  └── [logo, favicons, og-image, placeholders]
 
-/styles
-  └── globals.css                # Tailwind + design tokens
+proxy.ts                                    # Root-level auth guard for /admin/* (Next 16 convention)
 ```
 
 ## Database Schema
+
 
 ### Products Table
 ```sql

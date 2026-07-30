@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (orderError) {
-      console.error('[v0] Order insert error:', orderError);
+      console.error('Order insert error:', orderError);
       throw orderError;
     }
 
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
     );
 
     if (itemsError) {
-      console.error('[v0] Order items insert error:', itemsError);
+      console.error('Order items insert error:', itemsError);
       throw itemsError;
     }
 
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
     });
 
     console.log(
-      `[v0] Admin WhatsApp message for ${reference}:\n${generateAdminOrderWhatsAppMessage({
+      `Admin WhatsApp message for ${reference}:\n${generateAdminOrderWhatsAppMessage({
         customerName,
         customerPhone: phone,
         reference,
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, reference, orderId: order.id, whatsappLink }, { status: 201 });
   } catch (error) {
-    console.error('[v0] Orders API error:', error);
+    console.error('Orders API error:', error);
     return NextResponse.json(
       {
         error: 'Failed to place order. Please try again or contact us via WhatsApp.',

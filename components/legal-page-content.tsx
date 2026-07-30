@@ -16,7 +16,7 @@ export default function LegalPageContent({ slug }: { slug: LegalPage['slug'] }) 
       .getBySlug(slug)
       .then(setPage)
       .catch(err => {
-        console.error('[v0] Error fetching legal page:', err)
+        console.error('Error fetching legal page:', err)
         setError(true)
       })
       .finally(() => setLoading(false))

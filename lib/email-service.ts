@@ -21,6 +21,10 @@ export interface CustomOrderEmailData {
   referenceId: string;
 }
 
+function getFirstName(fullName: string): string {
+  return fullName.trim().split(/\s+/)[0];
+}
+
 // ============================================================================
 // Custom order request status update (sent to the customer whenever an
 // admin changes a request's status)
@@ -31,6 +35,9 @@ const CUSTOM_ORDER_STATUS_COPY: Record<string, { label: string; blurb: string }>
   REVIEWED: { label: 'Reviewed', blurb: "We've reviewed your request and are working out the details." },
   QUOTED: { label: 'Quote Ready', blurb: "We've put together a quote for your custom gift! We'll reach out on WhatsApp with the details." },
   CONFIRMED: { label: 'Confirmed', blurb: "Your custom gift request is confirmed and we're getting started!" },
+  PREPARING: { label: 'Preparing', blurb: "We're preparing your custom gift with care." },
+  OUT_FOR_DELIVERY: { label: 'Out for Delivery', blurb: 'Your custom gift is on its way!' },
+  DELIVERED: { label: 'Delivered', blurb: 'Your custom gift has been delivered. We hope it brought a smile!' },
   DECLINED: { label: 'Declined', blurb: "Unfortunately we're not able to fulfill this request. Feel free to reach out on WhatsApp if you'd like to discuss alternatives." },
 };
 
@@ -46,6 +53,7 @@ export async function sendCustomOrderStatusUpdate(data: CustomOrderStatusUpdateE
 
   try {
     const statusInfo = CUSTOM_ORDER_STATUS_COPY[data.status] || { label: data.status, blurb: 'Your request status has been updated.' };
+    const firstName = getFirstName(data.customerName);
 
     const html = `
       <!DOCTYPE html>
@@ -69,7 +77,7 @@ export async function sendCustomOrderStatusUpdate(data: CustomOrderStatusUpdateE
         <div class="container">
           <div class="header"><h1>🎁 Custom Order Update</h1></div>
           <div class="content">
-            <p>Hi <strong>${data.customerName}</strong>,</p>
+            <p>Hi <strong>${firstName}</strong>,</p>
             <p>${statusInfo.blurb}</p>
 
             <div class="status-badge">
@@ -96,10 +104,10 @@ export async function sendCustomOrderStatusUpdate(data: CustomOrderStatusUpdateE
       html,
     });
 
-    console.log(`[v0] Custom order status update email sent for ${data.referenceId}`);
+    console.log(`Custom order status update email sent for ${data.referenceId}`);
     return true;
   } catch (error) {
-    console.error('[v0] Custom order status update email failed:', error);
+    console.error('Custom order status update email failed:', error);
     return false;
   }
 }
@@ -111,6 +119,7 @@ function generateEmailHTML(data: CustomOrderEmailData): string {
     '25k-50k': '₦25,000 - ₦50,000',
     '50k-plus': '₦50,000+',
   };
+  const firstName = getFirstName(data.customerName);
 
   return `
     <!DOCTYPE html>
@@ -235,7 +244,7 @@ function generateEmailHTML(data: CustomOrderEmailData): string {
         </div>
         <div class="content">
           <div class="greeting">
-            <p>Hi <strong>${data.customerName}</strong>,</p>
+            <p>Hi <strong>${firstName}</strong>,</p>
             <p>Thank you for reaching out to <strong>Gifts by EverythingZeedat</strong>! We're thrilled that you've chosen us to create a special gift.</p>
           </div>
 
@@ -312,10 +321,10 @@ export async function sendCustomOrderConfirmation(data: CustomOrderEmailData): P
       html: generateEmailHTML(data),
     });
 
-    console.log(`[v0] Email sent successfully to ${data.customerEmail} for reference ${data.referenceId}`);
+    console.log(`Email sent successfully to ${data.customerEmail} for reference ${data.referenceId}`);
     return true;
   } catch (error) {
-    console.error('[v0] Email sending failed:', error);
+    console.error('Email sending failed:', error);
     throw error;
   }
 }
@@ -324,7 +333,7 @@ export async function sendCustomOrderNotificationToAdmin(data: CustomOrderEmailD
   try {
     // Send notification to admin
     const adminEmail = process.env.GMAIL_EMAIL; // Using same email for admin notification
-    
+
     const adminEmailHTML = `
       <!DOCTYPE html>
       <html lang="en">
@@ -390,10 +399,10 @@ export async function sendCustomOrderNotificationToAdmin(data: CustomOrderEmailD
       html: adminEmailHTML,
     });
 
-    console.log(`[v0] Admin notification sent for reference ${data.referenceId}`);
+    console.log(`Admin notification sent for reference ${data.referenceId}`);
     return true;
   } catch (error) {
-    console.error('[v0] Admin notification failed:', error);
+    console.error('Admin notification failed:', error);
     throw error;
   }
 }
@@ -444,6 +453,7 @@ export async function sendOrderConfirmation(data: OrderEmailData): Promise<boole
   if (!data.customerEmail) return false;
 
   try {
+    const firstName = getFirstName(data.customerName);
     const html = `
       <!DOCTYPE html>
       <html lang="en">
@@ -470,7 +480,7 @@ export async function sendOrderConfirmation(data: OrderEmailData): Promise<boole
         <div class="container">
           <div class="header"><h1>🎁 Order Received!</h1></div>
           <div class="content">
-            <p>Hi <strong>${data.customerName}</strong>,</p>
+            <p>Hi <strong>${firstName}</strong>,</p>
             <p>Thank you so much for shopping with <strong>Gifts by EverythingZeedat</strong>! 💕 We've received your order and here's a summary for your records.</p>
 
             <div class="snapshot">
@@ -509,10 +519,10 @@ export async function sendOrderConfirmation(data: OrderEmailData): Promise<boole
       html,
     });
 
-    console.log(`[v0] Order confirmation email sent for ${data.reference}`);
+    console.log(`Order confirmation email sent for ${data.reference}`);
     return true;
   } catch (error) {
-    console.error('[v0] Order confirmation email failed:', error);
+    console.error('Order confirmation email failed:', error);
     // Don't let a flaky email provider fail the whole order — the order is
     // already saved in the database at this point.
     return false;
@@ -567,10 +577,10 @@ export async function sendOrderNotificationToAdmin(data: OrderEmailData): Promis
       html,
     });
 
-    console.log(`[v0] Admin order notification sent for ${data.reference}`);
+    console.log(`Admin order notification sent for ${data.reference}`);
     return true;
   } catch (error) {
-    console.error('[v0] Admin order notification failed:', error);
+    console.error('Admin order notification failed:', error);
     return false;
   }
 }
@@ -603,7 +613,7 @@ export async function sendOrderStatusUpdate(data: OrderStatusUpdateEmailData): P
 
   try {
     const statusInfo = STATUS_COPY[data.status] || { label: data.status, blurb: 'Your order status has been updated.' };
-
+    const firstName = getFirstName(data.customerName);
     const html = `
       <!DOCTYPE html>
       <html lang="en">
@@ -627,7 +637,7 @@ export async function sendOrderStatusUpdate(data: OrderStatusUpdateEmailData): P
         <div class="container">
           <div class="header"><h1>🎁 Order Update</h1></div>
           <div class="content">
-            <p>Hi <strong>${data.customerName}</strong>,</p>
+            <p>Hi <strong>${firstName}</strong>,</p>
             <p>${statusInfo.blurb}</p>
 
             <div class="status-badge">
@@ -660,10 +670,10 @@ export async function sendOrderStatusUpdate(data: OrderStatusUpdateEmailData): P
       html,
     });
 
-    console.log(`[v0] Order status update email sent for ${data.reference}`);
+    console.log(`Order status update email sent for ${data.reference}`);
     return true;
   } catch (error) {
-    console.error('[v0] Order status update email failed:', error);
+    console.error('Order status update email failed:', error);
     return false;
   }
 }

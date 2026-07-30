@@ -7,6 +7,8 @@ import { ArrowRight, Gift, Heart, Sparkles } from 'lucide-react'
 import { api } from '@/lib/api'
 import type { Product } from '@/lib/api'
 import { useWishlist } from '@/lib/wishlist-context'
+import ReviewsSection from '@/components/reviews-section'
+import LeaveRatingButton from '@/components/leave-rating-button'
 
 export default function Home() {
   const [featured, setFeatured] = useState<Product[]>([])
@@ -17,7 +19,7 @@ export default function Home() {
     api.products
       .list({ featured: true })
       .then(data => setFeatured(data.slice(0, 4)))
-      .catch(err => console.error('[v0] Error fetching featured products:', err))
+      .catch(err => console.error('Error fetching featured products:', err))
       .finally(() => setLoading(false))
   }, [])
 
@@ -190,6 +192,9 @@ export default function Home() {
           </Link>
         </div>
       </section>
+
+      <ReviewsSection />
+      <LeaveRatingButton />
     </>
   )
 }

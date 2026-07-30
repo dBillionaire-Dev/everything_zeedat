@@ -47,7 +47,7 @@ export async function checkRateLimit({ key, limit, windowMinutes }: RateLimitOpt
 
     return { allowed: true, remaining: limit - currentCount - 1 };
   } catch (error) {
-    console.error('[v0] Rate limit check failed, allowing request through:', error);
+    console.error('Rate limit check failed, allowing request through:', error);
     return { allowed: true, remaining: limit };
   }
 }

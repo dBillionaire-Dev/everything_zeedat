@@ -35,7 +35,7 @@ export default function AdminOrdersPage() {
         const data = await api.orders.list()
         setOrders(data)
       } catch (error) {
-        console.error('[v0] Error fetching orders:', error)
+        console.error('Error fetching orders:', error)
       } finally {
         setLoading(false)
       }
@@ -63,7 +63,7 @@ export default function AdminOrdersPage() {
       const updated = await updateOrder(orderId, { status: newStatus })
       setOrders(prev => prev.map(o => o.id === orderId ? updated : o))
     } catch (error) {
-      console.error('[v0] Error updating order:', error)
+      console.error('Error updating order:', error)
     }
   }
 
@@ -73,7 +73,7 @@ export default function AdminOrdersPage() {
       const updated = await updateOrder(orderId, { payment_status: 'PAID' })
       setOrders(prev => prev.map(o => o.id === orderId ? updated : o))
     } catch (error) {
-      console.error('[v0] Error confirming payment:', error)
+      console.error('Error confirming payment:', error)
     } finally {
       setConfirmingPaymentId(null)
     }
@@ -85,7 +85,7 @@ export default function AdminOrdersPage() {
       await api.orders.remove(orderId)
       setOrders(prev => prev.filter(o => o.id !== orderId))
     } catch (error) {
-      console.error('[v0] Error deleting order:', error)
+      console.error('Error deleting order:', error)
     } finally {
       setDeletingId(null)
       setConfirmingId(null)

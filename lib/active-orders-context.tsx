@@ -3,7 +3,10 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
 import { api } from './api'
 
+export type ActiveOrderType = 'order' | 'custom-order'
+
 export interface ActiveOrder {
+  type: ActiveOrderType
   reference: string
   phone: string
   addedAt: string
@@ -11,16 +14,25 @@ export interface ActiveOrder {
 
 interface ActiveOrdersContextType {
   activeOrders: ActiveOrder[]
-  addActiveOrder: (reference: string, phone: string) => void
+  addActiveOrder: (type: ActiveOrderType, reference: string, phone: string) => void
 }
 
 const ActiveOrdersContext = createContext<ActiveOrdersContextType | undefined>(undefined)
 
-const STORAGE_KEY = 'gbez_active_orders_v1'
+const STORAGE_KEY = 'gbez_active_orders_v2'
 
-// Once an order reaches one of these, there's nothing left to "track" —
-// the button should disappear.
-const TERMINAL_STATUSES = new Set(['DELIVERED', 'CANCELLED'])
+// Once an order/request reaches one of these, there's nothing left to
+// "track" -- it should drop off the list.
+const TERMINAL_STATUSES: Record<ActiveOrderType, Set<string>> = {
+  order: new Set(['DELIVERED', 'CANCELLED']),
+  'custom-order': new Set(['DELIVERED', 'DECLINED']),
+}
+
+export function trackingPath(order: Pick<ActiveOrder, 'type' | 'reference'>): string {
+  return order.type === 'custom-order'
+    ? `/custom-order-tracking/${order.reference}`
+    : `/order-tracking/${order.reference}`
+}
 
 function loadStored(): ActiveOrder[] {
   if (typeof window === 'undefined') return []
@@ -38,8 +50,8 @@ export function ActiveOrdersProvider({ children }: { children: React.ReactNode }
   const [activeOrders, setActiveOrders] = useState<ActiveOrder[]>([])
   const hasHydrated = useRef(false)
 
-  // Load whatever was saved, then check each one's real status. An order
-  // drops off the list if it's been delivered/cancelled, or if the lookup
+  // Load whatever was saved, then check each one's real status. An entry
+  // drops off the list if it's reached a terminal status, or if the lookup
   // fails entirely -- which is what happens once an admin deletes it, since
   // the reference simply won't exist anymore.
   useEffect(() => {
@@ -52,15 +64,19 @@ export function ActiveOrdersProvider({ children }: { children: React.ReactNode }
     let cancelled = false
     ;(async () => {
       const stillActive: ActiveOrder[] = []
-      for (const order of stored) {
+      for (const entry of stored) {
         try {
-          const result = await api.orders.getByReference(order.reference, order.phone)
-          if (!TERMINAL_STATUSES.has(result.status)) {
-            stillActive.push(order)
+          const result =
+            entry.type === 'custom-order'
+              ? await api.customOrders.getByReference(entry.reference, entry.phone)
+              : await api.orders.getByReference(entry.reference, entry.phone)
+
+          if (!TERMINAL_STATUSES[entry.type].has(result.status)) {
+            stillActive.push(entry)
           }
         } catch {
-          // Order not found (deleted by admin) or lookup failed -- either
-          // way, stop showing it as trackable.
+          // Not found (deleted by admin) or lookup failed -- either way,
+          // stop showing it as trackable.
         }
       }
       if (!cancelled) setActiveOrders(stillActive)
@@ -80,10 +96,10 @@ export function ActiveOrdersProvider({ children }: { children: React.ReactNode }
     }
   }, [activeOrders])
 
-  const addActiveOrder = (reference: string, phone: string) => {
+  const addActiveOrder = (type: ActiveOrderType, reference: string, phone: string) => {
     setActiveOrders(prev => {
-      if (prev.some(o => o.reference === reference)) return prev
-      return [...prev, { reference, phone, addedAt: new Date().toISOString() }]
+      if (prev.some(o => o.type === type && o.reference === reference)) return prev
+      return [...prev, { type, reference, phone, addedAt: new Date().toISOString() }]
     })
   }
 

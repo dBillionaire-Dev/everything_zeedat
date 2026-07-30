@@ -57,7 +57,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       sendCustomOrderStatusUpdate({
         customerName: customOrder.customer_name,
         customerEmail: customOrder.email,
-        referenceId: `CO-${customOrder.id.slice(0, 8).toUpperCase()}`,
+        referenceId: customOrder.reference,
         status: customOrder.status,
       }).catch(err => console.error('Custom order status email failed (non-fatal):', err));
     }

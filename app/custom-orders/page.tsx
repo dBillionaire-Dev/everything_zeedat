@@ -6,8 +6,10 @@ import { AlertCircle, CheckCircle, ImagePlus, X, Loader2 } from 'lucide-react'
 import { api } from '@/lib/api'
 import { uploadReferenceImage, UploadError } from '@/lib/upload'
 import { WHATSAPP_NUMBER } from '@/lib/constants'
+import { useActiveOrders } from '@/lib/active-orders-context'
 
 export default function CustomOrdersPage() {
+  const { addActiveOrder } = useActiveOrders()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -100,13 +102,14 @@ export default function CustomOrdersPage() {
       setSubmitted(true)
       // Store reference ID for display
       localStorage.setItem('lastOrderReference', data.referenceId)
+      addActiveOrder('custom-order', data.referenceId, formData.phone)
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
           : 'Failed to submit request. Please try again or contact us via WhatsApp.'
       )
-      console.error('[v0] Custom order error:', err)
+      console.error('Custom order error:', err)
     } finally {
       setLoading(false)
     }
@@ -140,7 +143,7 @@ export default function CustomOrdersPage() {
           <ul className="text-left space-y-3 mb-6">
             <li className="flex gap-3 text-sm text-[#666]">
               <span className="text-[#d4a5a5] font-bold flex-shrink-0">✓</span>
-              <span>Confirmation email sent to your email address</span>
+              <span>Confirmation email sent, if you provided one</span>
             </li>
             <li className="flex gap-3 text-sm text-[#666]">
               <span className="text-[#d4a5a5] font-bold flex-shrink-0">✓</span>
@@ -170,6 +173,15 @@ export default function CustomOrdersPage() {
           >
             💬 Message on WhatsApp
           </a>
+
+          {referenceId && (
+            <Link
+              href={`/custom-order-tracking/${referenceId}`}
+              className="inline-block w-full bg-[#d4a5a5] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#c4956f] transition-colors mb-3"
+            >
+              Track This Request
+            </Link>
+          )}
 
           <Link
             href="/"

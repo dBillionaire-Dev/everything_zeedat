@@ -68,12 +68,12 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         status: order.status,
         paymentStatus: order.payment_status,
         paymentJustConfirmed: Boolean(payment_status === 'PAID'),
-      }).catch(err => console.error('[v0] Order status email failed (non-fatal):', err));
+      }).catch(err => console.error('Order status email failed (non-fatal):', err));
     }
 
     return NextResponse.json({ success: true, order });
   } catch (error) {
-    console.error('[v0] Order status update error:', error);
+    console.error('Order status update error:', error);
     return NextResponse.json(
       { error: 'Failed to update order', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
