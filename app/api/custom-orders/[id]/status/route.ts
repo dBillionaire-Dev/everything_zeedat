@@ -59,12 +59,12 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         customerEmail: customOrder.email,
         referenceId: `CO-${customOrder.id.slice(0, 8).toUpperCase()}`,
         status: customOrder.status,
-      }).catch(err => console.error('[v0] Custom order status email failed (non-fatal):', err));
+      }).catch(err => console.error('Custom order status email failed (non-fatal):', err));
     }
 
     return NextResponse.json({ success: true, customOrder });
   } catch (error) {
-    console.error('[v0] Custom order status update error:', error);
+    console.error('Custom order status update error:', error);
     return NextResponse.json(
       { error: 'Failed to update request', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

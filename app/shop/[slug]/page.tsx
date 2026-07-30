@@ -7,6 +7,7 @@ import { api } from '@/lib/api'
 import type { Product } from '@/lib/api'
 import { useCart } from '@/lib/cart-context'
 import { useWishlist } from '@/lib/wishlist-context'
+import { buildWhatsAppLink } from '@/lib/constants'
 
 export default function ProductPage() {
   const params = useParams()
@@ -283,7 +284,7 @@ export default function ProductPage() {
               </button>
 
               <a
-                href={`https://wa.me/2348131288947?text=Hi!%20I%27m%20interested%20in%20${encodeURIComponent(product.name)}`}
+                href={buildWhatsAppLink(`Hi! I'm interested in ${product.name}`)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full bg-[#25D366] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#1fa855] transition-colors text-center"

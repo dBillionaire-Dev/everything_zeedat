@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    
+
     const {
       customerName,
       customerEmail,
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     // Create custom order in Supabase
     const supabase = createServiceRoleClient();
-    
+
     const { data, error } = await supabase
       .from('custom_order_requests')
       .insert([
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('[v0] Supabase error:', error);
+      console.error('Supabase error:', error);
       throw error;
     }
 
@@ -85,10 +85,10 @@ export async function POST(request: NextRequest) {
     ]);
 
     if (confirmationResult.status === 'rejected') {
-      console.error('[v0] Customer confirmation email failed (non-fatal):', confirmationResult.reason);
+      console.error('Customer confirmation email failed (non-fatal):', confirmationResult.reason);
     }
     if (adminResult.status === 'rejected') {
-      console.error('[v0] Admin notification email failed (non-fatal):', adminResult.reason);
+      console.error('Admin notification email failed (non-fatal):', adminResult.reason);
     }
 
     // Generate admin WhatsApp message (for manual forwarding if needed)
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       preferredDeliveryDate,
       referenceId,
     });
-    console.log(`[v0] Admin WhatsApp Message for ${referenceId}:\n${adminWhatsAppMessage}`);
+    console.log(`Admin WhatsApp Message for ${referenceId}:\n${adminWhatsAppMessage}`);
 
     return NextResponse.json(
       {
@@ -113,9 +113,9 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('[v0] API error:', error);
+    console.error('API error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to submit custom order request. Please try again or contact us via WhatsApp.',
         details: error instanceof Error ? error.message : 'Unknown error'
       },

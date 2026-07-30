@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Phone, Camera, MapPin } from 'lucide-react'
+import { WHATSAPP_NUMBER, INSTAGRAM_URL, INSTAGRAM_HANDLE } from '@/lib/constants'
 
 export default function ContactPage() {
   return (
@@ -30,7 +31,7 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-semibold text-[#2a2a2a] mb-1">WhatsApp</h3>
                   <a
-                    href="https://wa.me/2348131288947"
+                    href={`https://wa.me/${WHATSAPP_NUMBER}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[#8b8b8b] hover:text-[#d4a5a5] transition-colors"
@@ -48,12 +49,12 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-semibold text-[#2a2a2a] mb-1">Instagram</h3>
                   <a
-                    href="https://instagram.com/gifts.by.everythingzeedat"
+                    href={INSTAGRAM_URL}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[#8b8b8b] hover:text-[#d4a5a5] transition-colors"
                   >
-                    @gifts.by.everythingzeedat
+                    {INSTAGRAM_HANDLE}
                   </a>
                   <p className="text-sm text-[#8b8b8b] mt-1">Follow for updates & inspiration</p>
                 </div>
@@ -82,7 +83,7 @@ export default function ContactPage() {
 
               <div className="space-y-3">
                 <a
-                  href="https://wa.me/2348131288947"
+                  href={`https://wa.me/${WHATSAPP_NUMBER}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block w-full bg-[#25D366] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#1fa855] transition-colors text-center"

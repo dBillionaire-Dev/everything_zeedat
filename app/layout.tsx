@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Geist, Playfair_Display } from 'next/font/google'
 import './globals.css'
 import Navigation from '@/components/navigation'
+import Footer from '@/components/footer'
 import { CartProvider } from '@/lib/cart-context'
 import { WishlistProvider } from '@/lib/wishlist-context'
 import { ActiveOrdersProvider } from '@/lib/active-orders-context'
@@ -81,6 +82,7 @@ export default function RootLayout({
               <main>
                 {children}
               </main>
+              <Footer />
             </ActiveOrdersProvider>
           </WishlistProvider>
         </CartProvider>

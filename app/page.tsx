@@ -190,48 +190,6 @@ export default function Home() {
           </Link>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-[#2a2a2a] text-white py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <span className="font-serif font-semibold text-[#b8b8b8] text-lg">
-                Zeedat Gifts
-              </span>
-              <p className="text-[#b8b8b8] text-sm">Premium personalized gifts for every occasion.</p>
-            </div>
-            <div>
-              <h5 className="font-semibold mb-3">Shop</h5>
-              <ul className="space-y-2 text-sm text-[#b8b8b8]">
-                <li><Link href="/shop" className="hover:text-white">All Products</Link></li>
-                <li><Link href="/shop" className="hover:text-white">Hampers</Link></li>
-                <li><Link href="/shop" className="hover:text-white">Gift Boxes</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h5 className="font-semibold mb-3">Company</h5>
-              <ul className="space-y-2 text-sm text-[#b8b8b8]">
-                <li><Link href="/about" className="hover:text-white">About Us</Link></li>
-                <li><Link href="/contact" className="hover:text-white">Contact</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h5 className="font-semibold mb-3">Connect</h5>
-              <p className="text-sm text-[#b8b8b8]">
-                WhatsApp: <a href="https://wa.me/2348131288947" target="_blank" rel="noopener noreferrer" className="hover:text-white">+234 813 128 8947</a>
-              </p>
-            </div>
-          </div>
-          <div className="border-t border-[#4a4a4a] pt-8 text-center text-sm text-[#b8b8b8]">
-            <p>
-              <a href="https://nex.is-a.dev/" target="_blank" rel="noopener noreferrer" className="hover:text-white">
-                &copy; {new Date().getFullYear()} Gifts by EverythingZeedat. All rights reserved.
-              </a>
-            </p>
-          </div>
-        </div>
-      </footer>
     </>
   )
 }
