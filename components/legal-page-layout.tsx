@@ -19,7 +19,7 @@ export default function LegalPageLayout({
       </section>
 
       <div className="max-w-4xl mx-auto px-4 py-12">
-        <div className="prose-legal space-y-8 text-[#2a2a2a] leading-relaxed">
+        <div className="prose-legal text-[#2a2a2a] leading-relaxed">
           {children}
         </div>
 

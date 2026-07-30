@@ -79,6 +79,14 @@ export interface CustomOrderRequest {
   updated_at: string;
 }
 
+export interface LegalPage {
+  id: string;
+  slug: 'privacy' | 'terms' | 'refund-policy';
+  title: string;
+  content: string;
+  updated_at: string;
+}
+
 // Helper to generate order reference
 // (defined in ./order-reference.ts — see that file for why it's not defined
 // here directly, in a file marked 'use client')
@@ -320,6 +328,33 @@ export const api = {
       const supabase = createClient();
       const { error } = await supabase.from('custom_order_requests').delete().eq('id', id);
       if (error) throw error;
+    },
+  },
+
+  legalPages: {
+    async getBySlug(slug: 'privacy' | 'terms' | 'refund-policy') {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('legal_pages')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+
+      if (error) throw error;
+      return data as LegalPage;
+    },
+
+    async update(slug: 'privacy' | 'terms' | 'refund-policy', updates: { title: string; content: string }) {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('legal_pages')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('slug', slug)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as LegalPage;
     },
   },
 }
