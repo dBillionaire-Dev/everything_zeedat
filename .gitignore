@@ -16,10 +16,6 @@ node_modules
 .DS_Store
 
 # Ignored files
-EMAIL_SETUP.md
 IMPLEMENTATION_NOTES.md
-NOTIFICATIONS.md
-PROJECT_SUMMARY.md
-QUICKSTART.md
 tsconfig.tsbuildinfo
 note.txt
