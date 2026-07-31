@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { WHATSAPP_NUMBER, WHATSAPP_DISPLAY, INSTAGRAM_URL, INSTAGRAM_HANDLE } from './constants';
+import { WHATSAPP_NUMBER, WHATSAPP_DISPLAY, INSTAGRAM_URL, INSTAGRAM_HANDLE, SITE_URL as siteUrl } from './constants';
 
 // Initialize Gmail transporter
 const transporter = nodemailer.createTransport({
@@ -84,9 +84,43 @@ export async function sendCustomOrderStatusUpdate(data: CustomOrderStatusUpdateE
               Request ${`<span class="reference-id">${data.referenceId}</span>`} is now: ${statusInfo.label}
             </div>
 
-            <div style="text-align: center; margin: 25px 0;">
-              <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi Zeedat, following up on my custom order request — Reference: ${data.referenceId}`)}" class="cta-button">💬 Message Us on WhatsApp</a>
-            </div>
+            ${
+              data.status === 'DELIVERED'
+                ? `
+                <div style="text-align: center; margin: 25px 0; padding: 20px; background-color: #fdf6f0; border-radius: 8px;">
+                  <p style="margin: 0 0 12px 0; font-size: 15px; color: #2a2a2a;">
+                    💕 Thank you for trusting Gifts by EverythingZeedat with your custom gift! We'd love to hear about your experience.
+                  </p>
+                  <a href="${siteUrl}/#reviews" class="cta-button" style="background-color: #d4a5a5; margin-bottom: 24px;">
+                    Leave a Review
+                  </a>
+                </div>
+
+                <div style="margin-top: 30px;">
+                  <p style="margin: 0 0 12px 0; font-size: 15px; color: #2a2a2a;">
+                    <strong>P.S:</strong> If you have any concern about your order, kindly message us on WhatsApp
+                  </p>
+                  <a
+                    href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                      `Hi Zeedat, my custom order (${data.referenceId}) has been delivered. I have a concern.`
+                    )}"
+                    class="cta-button"
+                    style="background-color: #25d366;"
+                  >
+                    💬 Contact Us
+                  </a>
+                </div>
+                `
+                : `
+                <div style="text-align: center; margin: 25px 0;">
+                  <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                    `Hi Zeedat, following up on my custom order request — Reference: ${data.referenceId}`
+                  )}" class="cta-button">
+                    💬 Message Us on WhatsApp
+                  </a>
+                </div>
+                `
+            }
           </div>
           <div class="footer">
             <p style="margin: 0 0 10px 0;"><strong>Gifts by EverythingZeedat</strong></p>
@@ -119,7 +153,7 @@ function generateEmailHTML(data: CustomOrderEmailData): string {
     '25k-50k': '₦25,000 - ₦50,000',
     '50k-plus': '₦50,000+',
   };
-  const firstName = getFirstName(data.customerName);
+   const firstName = getFirstName(data.customerName);
 
   return `
     <!DOCTYPE html>
@@ -383,6 +417,11 @@ export async function sendCustomOrderNotificationToAdmin(data: CustomOrderEmailD
               <p class="label">Description:</p>
               <p>${data.description}</p>
             </div>
+            <div style="margin: 20px 0; padding: 15px; background: #fdf6f0; border-left: 4px solid #d4a5a5; border-radius: 6px;">
+              <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: bold; color: #2a2a2a; text-transform: uppercase;">Suggested message to send them:</p>
+              <p style="margin: 0; font-size: 14px; color: #2a2a2a; font-style: italic; white-space: pre-line;">Hi ${data.customerName}! Thank you for your custom gift request (Ref: ${data.referenceId}) for ${data.occasion}. I've reviewed your details and would love to help bring your vision to life, could we chat a bit more here on WhatsApp so I can share a personalized quote? Looking forward to creating something special for you! 💕
+~ Zeedat, Gifts by EverythingZeedat</p>
+            </div>
             <p style="margin-top: 20px; font-size: 12px; color: #666;">
               Respond to customer within 24 hours.
             </p>
@@ -563,6 +602,11 @@ export async function sendOrderNotificationToAdmin(data: OrderEmailData): Promis
             ${data.notes ? `<div class="detail"><p class="label">Notes:</p><p>${data.notes}</p></div>` : ''}
             <div class="detail"><p class="label">Items:</p>${itemsRows}</div>
             <div class="detail"><p class="label">Total:</p><p>${formatNaira(data.total)} (subtotal ${formatNaira(data.subtotal)} + delivery ${formatNaira(data.deliveryFee)})</p></div>
+            <div style="margin: 20px 0; padding: 15px; background: #fdf6f0; border-left: 4px solid #d4a5a5; border-radius: 6px;">
+              <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: bold; color: #2a2a2a; text-transform: uppercase;">Suggested message to send them:</p>
+              <p style="margin: 0; font-size: 14px; color: #2a2a2a; font-style: italic; white-space: pre-line;">Hi ${data.customerName}! Thank you for your order (Ref: ${data.reference}) with Gifts by EverythingZeedat 🎁. I'd like to confirm a few details and share payment options with you, could we chat here on WhatsApp when you have a moment? Looking forward to getting your gift ready! 💕
+~ Zeedat, Gifts by EverythingZeedat</p>
+            </div>
             <p style="margin-top: 20px; font-size: 12px; color: #666;">Reach out to confirm payment and delivery details.</p>
           </div>
         </div>
@@ -614,6 +658,7 @@ export async function sendOrderStatusUpdate(data: OrderStatusUpdateEmailData): P
   try {
     const statusInfo = STATUS_COPY[data.status] || { label: data.status, blurb: 'Your order status has been updated.' };
     const firstName = getFirstName(data.customerName);
+
     const html = `
       <!DOCTYPE html>
       <html lang="en">
@@ -647,6 +692,34 @@ export async function sendOrderStatusUpdate(data: OrderStatusUpdateEmailData): P
             ${
               data.paymentJustConfirmed
                 ? `<div class="payment-note">✅ We've also confirmed receipt of your payment for this order. Thank you!</div>`
+                : ''
+            }
+
+            ${
+              data.status === 'DELIVERED'
+                ? `
+            <div style="text-align: center; margin: 25px 0; padding: 20px; background-color: #fdf6f0; border-radius: 8px;">
+              <p style="margin: 0 0 12px 0; font-size: 15px; color: #2a2a2a;">
+                💕 Thank you for shopping with us! We'd love to hear what you thought.
+              </p>
+              <a href="${siteUrl}/#reviews" class="cta-button" style="margin-bottom: 24px;">Leave a Review</a>
+            </div>
+
+            <div style="margin-top: 30px;">
+              <p style="margin: 0 0 12px 0; font-size: 15px; color: #2a2a2a;">
+                <strong>P.S:</strong> If you have any concern about your order, kindly message us on WhatsApp
+              </p>
+              <a
+                href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                  `Hi Zeedat, my order (${data.reference}) has been delivered. I have a concern.`
+                )}"
+                class="cta-button"
+                style="background-color: #25d366;"
+              >
+                💬 Contact Us
+              </a>
+            </div>
+            `
                 : ''
             }
 

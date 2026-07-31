@@ -11,6 +11,7 @@ export default function Footer() {
               Zeedat Gifts
             </span>
             <p className="text-[#b8b8b8] text-sm mt-2">Premium personalized gifts for every occasion.</p>
+            <p className='text-[#b8b8b8] text-sm mt-2 hover:text-white'><a href='https://nex.is-a.dev/' target='_blank'>Powered by NexDev</a></p>
           </div>
           <div>
             <h5 className="font-semibold mb-3">Shop</h5>

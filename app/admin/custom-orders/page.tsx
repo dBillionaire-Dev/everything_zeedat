@@ -166,7 +166,7 @@ export default function AdminCustomOrdersPage() {
                   <div>
                     <p className="text-xs text-[#8b8b8b] uppercase mb-1">Contact</p>
                     <a
-                      href={`https://wa.me/${selectedRequest.phone.replace(/\D/g, '')}`}
+                      href={`https://wa.me/${selectedRequest.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi ${selectedRequest.customer_name}! Thank you for your custom gift request (Ref: ${selectedRequest.reference}) for ${selectedRequest.occasion}. I'd love to chat about the details so I can share a personalized quote with you. 💕`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[#d4a5a5] hover:text-[#c4956f] flex items-center gap-2"

@@ -31,7 +31,7 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-semibold text-[#2a2a2a] mb-1">WhatsApp</h3>
                   <a
-                    href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                    href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi Zeedat! I have a question about your gifts and would love some help.")}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[#8b8b8b] hover:text-[#d4a5a5] transition-colors"
@@ -83,7 +83,7 @@ export default function ContactPage() {
 
               <div className="space-y-3">
                 <a
-                  href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                  href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi Zeedat! I'd like to chat about a gift.")}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block w-full bg-[#25D366] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#1fa855] transition-colors text-center"
