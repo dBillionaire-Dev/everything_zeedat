@@ -4,9 +4,9 @@ import { Gift, ArrowLeft, Search } from 'lucide-react'
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#f9f7f4] to-white flex items-center justify-center px-4">
+    <div className="min-h-[70vh] bg-gradient-to-b from-[#f9f7f4] to-white flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center">
-        <div className="w-20 h-20 rounded-full bg-[#e8d4d4] flex items-center justify-center mx-auto mb-6">
+        <div className="w-20 h-20 rounded-full bg-[#e8d4d4] flex items-center justify-center mx-auto mb-2">
           <Image
             src="/logo.png"
             alt="Zeedat Gifts"
@@ -16,7 +16,7 @@ export default function NotFound() {
           />
         </div>
 
-        <p className="font-serif text-6xl font-bold text-[#d4a5a5] mb-2">404</p>
+        <p className="font-serif text-8xl font-bold text-[#d4a5a5] mb-2">404</p>
         <h1 className="font-serif text-2xl font-bold text-[#2a2a2a] mb-3">
           This gift got lost in transit
         </h1>

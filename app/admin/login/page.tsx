@@ -54,7 +54,7 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#f9f7f4] to-white flex items-center justify-center px-4">
+    <div className="min-h-[70vh] bg-gradient-to-b from-[#f9f7f4] to-white flex items-center justify-center px-4">
       <div className="max-w-sm w-full">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2">
