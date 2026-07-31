@@ -224,7 +224,7 @@ export default function CustomOrderTrackingPage() {
         <div className="bg-[#e8d4d4] bg-opacity-50 border border-[#d4a5a5] rounded-lg p-6 text-center">
           <p className="text-[#2a2a2a] mb-4">Have questions about your request?</p>
           <a
-            href={buildWhatsAppLink(`Hi! I have a question about my custom order request ${request.reference}.`)}
+            href={buildWhatsAppLink(`Hi! I have a question about my custom order request (Ref: ${request.reference}) and would appreciate some help.`)}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block bg-[#25D366] text-white px-6 py-2 rounded-lg font-medium hover:bg-[#1fa855] transition-colors"

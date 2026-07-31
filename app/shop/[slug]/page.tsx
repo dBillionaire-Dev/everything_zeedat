@@ -284,7 +284,7 @@ export default function ProductPage() {
               </button>
 
               <a
-                href={buildWhatsAppLink(`Hi! I'm interested in ${product.name}`)}
+                href={buildWhatsAppLink(`Hi! I'm interested in ${product.name} and would love to know more before ordering.`)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full bg-[#25D366] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#1fa855] transition-colors text-center"

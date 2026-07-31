@@ -18,4 +18,4 @@ node_modules
 # Ignored files
 IMPLEMENTATION_NOTES.md
 tsconfig.tsbuildinfo
-note.txt
+NOTE.md

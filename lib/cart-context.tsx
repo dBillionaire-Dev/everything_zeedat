@@ -12,6 +12,13 @@ export interface CartItem {
   customization?: Record<string, string>
 }
 
+export interface CartToast {
+  id: number
+  name: string
+  image?: string
+  quantity: number
+}
+
 interface CartContextType {
   items: CartItem[]
   addItem: (item: CartItem) => void
@@ -19,6 +26,8 @@ interface CartContextType {
   updateQuantity: (productId: string, quantity: number) => void
   clear: () => void
   total: number
+  toast: CartToast | null
+  dismissToast: () => void
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
@@ -40,7 +49,9 @@ function loadStoredCart(): CartItem[] {
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
+  const [toast, setToast] = useState<CartToast | null>(null)
   const hasHydrated = useRef(false)
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Load whatever was saved from a previous visit, once, on mount.
   useEffect(() => {
@@ -72,6 +83,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return [...prev, item]
     })
+
+    setToast({ id: Date.now(), name: item.name, image: item.image, quantity: item.quantity })
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current)
+    toastTimeoutRef.current = setTimeout(() => setToast(null), 3500)
+  }
+
+  const dismissToast = () => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current)
+    setToast(null)
   }
 
   const removeItem = (productId: string) => {
@@ -93,7 +113,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clear, total }}>
+    <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clear, total, toast, dismissToast }}>
       {children}
     </CartContext.Provider>
   )

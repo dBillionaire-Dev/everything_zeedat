@@ -270,7 +270,7 @@ export default function OrderTrackingPage() {
             Have questions about your order?
           </p>
           <a
-            href={buildWhatsAppLink(`Hi! I have a question about my order ${order.reference}.`)}
+            href={buildWhatsAppLink(`Hi! I have a question about my order (Ref: ${order.reference}) and would appreciate some help.`)}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block bg-[#25D366] text-white px-6 py-2 rounded-lg font-medium hover:bg-[#1fa855] transition-colors"

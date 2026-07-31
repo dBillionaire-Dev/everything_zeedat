@@ -166,7 +166,7 @@ export default function CustomOrdersPage() {
           </div>
 
           <a
-            href={`https://wa.me/${WHATSAPP_NUMBER}`}
+            href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi Zeedat! I just submitted a custom gift request (Ref: ${referenceId || ''}) and wanted to follow up.`)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block w-full bg-[#25d366] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#1fa857] transition-colors mb-3"

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Check, Clock, Trash2, CreditCard } from 'lucide-react'
+import { ArrowLeft, Check, Clock, Trash2, CreditCard, MessageCircle } from 'lucide-react'
 import { api } from '@/lib/api'
 import type { Order } from '@/lib/api'
 
@@ -157,7 +157,15 @@ export default function AdminOrdersPage() {
                       <td className="px-6 py-4 text-sm text-[#2a2a2a]">
                         <div>
                           <p className="font-medium">{order.customer_name}</p>
-                          <p className="text-xs text-[#8b8b8b]">{order.phone}</p>
+                          <a
+                            href={`https://wa.me/${order.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi ${order.customer_name}! Thank you for your order (Ref: ${order.reference}) with Gifts by EverythingZeedat 🎁. I'd like to confirm a few details and share payment options with you. 💕`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-[#d4a5a5] hover:text-[#c4956f] flex items-center gap-1"
+                          >
+                            <MessageCircle className="w-3 h-3" />
+                            {order.phone}
+                          </a>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm font-semibold text-[#d4a5a5]">

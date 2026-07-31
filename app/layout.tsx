@@ -4,14 +4,14 @@ import { Geist, Playfair_Display } from 'next/font/google'
 import './globals.css'
 import Navigation from '@/components/navigation'
 import Footer from '@/components/footer'
+import CartToast from '@/components/cart-toast'
 import { CartProvider } from '@/lib/cart-context'
 import { WishlistProvider } from '@/lib/wishlist-context'
 import { ActiveOrdersProvider } from '@/lib/active-orders-context'
+import { SITE_URL as siteUrl } from '@/lib/constants'
 
 const geist = Geist({ subsets: ['latin'] })
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-serif' })
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://everythingzeedat.vercel.app'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -83,6 +83,7 @@ export default function RootLayout({
                 {children}
               </main>
               <Footer />
+              <CartToast />
             </ActiveOrdersProvider>
           </WishlistProvider>
         </CartProvider>

@@ -3,6 +3,8 @@
 // here if pricing changes.
 export const DELIVERY_FEE = 2000;
 
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://everythingzeedat.vercel.app';
+
 // Business contact details, used across WhatsApp deep links, email
 // templates, and the footer/contact page. Update here once, everywhere
 // picks it up -- previously this number was hardcoded separately in ~7

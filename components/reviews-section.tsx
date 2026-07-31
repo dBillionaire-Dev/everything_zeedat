@@ -36,7 +36,7 @@ export default function ReviewsSection() {
   const hasMore = visibleCount < reviews.length
 
   return (
-    <section className="py-16 bg-[#f9f7f4]">
+    <section id="reviews" className="py-16 bg-[#f9f7f4]">
       <div className="max-w-5xl mx-auto px-4">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-serif font-bold text-[#2a2a2a] mb-2">
