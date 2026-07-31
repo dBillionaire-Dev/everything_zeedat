@@ -367,6 +367,7 @@ export async function sendCustomOrderNotificationToAdmin(data: CustomOrderEmailD
   try {
     // Send notification to admin
     const adminEmail = process.env.GMAIL_EMAIL; // Using same email for admin notification
+    const firstName = getFirstName(data.customerName);
 
     const adminEmailHTML = `
       <!DOCTYPE html>
@@ -419,8 +420,15 @@ export async function sendCustomOrderNotificationToAdmin(data: CustomOrderEmailD
             </div>
             <div style="margin: 20px 0; padding: 15px; background: #fdf6f0; border-left: 4px solid #d4a5a5; border-radius: 6px;">
               <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: bold; color: #2a2a2a; text-transform: uppercase;">Suggested message to send them:</p>
-              <p style="margin: 0; font-size: 14px; color: #2a2a2a; font-style: italic; white-space: pre-line;">Hi ${data.customerName}! Thank you for your custom gift request (Ref: ${data.referenceId}) for ${data.occasion}. I've reviewed your details and would love to help bring your vision to life, could we chat a bit more here on WhatsApp so I can share a personalized quote? Looking forward to creating something special for you! 💕
-~ Zeedat, Gifts by EverythingZeedat</p>
+              <p style="margin: 0; font-size: 14px; color: #2a2a2a; font-style: italic; white-space: pre-line;">Hi ${firstName}!
+
+              Thank you for your custom gift request (Ref: ${data.referenceId}) for ${data.occasion}.
+
+              I've reviewed your details and would love to help bring your vision to life, could we chat a bit more here on WhatsApp so I can share a personalized quote?
+
+              Looking forward to creating something special for you!              💕
+
+~ <em>Zeedat</em> from <strong>Gifts by EverythingZeedat</strong></p>
             </div>
             <p style="margin-top: 20px; font-size: 12px; color: #666;">
               Respond to customer within 24 hours.
@@ -575,6 +583,7 @@ export async function sendOrderNotificationToAdmin(data: OrderEmailData): Promis
     const itemsRows = data.items
       .map(item => `<div class="detail"><p>${item.name} × ${item.quantity} — ${formatNaira(item.price * item.quantity)}</p></div>`)
       .join('');
+    const firstName = getFirstName(data.customerName);
 
     const html = `
       <!DOCTYPE html>
@@ -604,8 +613,14 @@ export async function sendOrderNotificationToAdmin(data: OrderEmailData): Promis
             <div class="detail"><p class="label">Total:</p><p>${formatNaira(data.total)} (subtotal ${formatNaira(data.subtotal)} + delivery ${formatNaira(data.deliveryFee)})</p></div>
             <div style="margin: 20px 0; padding: 15px; background: #fdf6f0; border-left: 4px solid #d4a5a5; border-radius: 6px;">
               <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: bold; color: #2a2a2a; text-transform: uppercase;">Suggested message to send them:</p>
-              <p style="margin: 0; font-size: 14px; color: #2a2a2a; font-style: italic; white-space: pre-line;">Hi ${data.customerName}! Thank you for your order (Ref: ${data.reference}) with Gifts by EverythingZeedat 🎁. I'd like to confirm a few details and share payment options with you, could we chat here on WhatsApp when you have a moment? Looking forward to getting your gift ready! 💕
-~ Zeedat, Gifts by EverythingZeedat</p>
+              <p style="margin: 0; font-size: 14px; color: #2a2a2a; font-style: italic; white-space: pre-line;">Hi ${firstName}!
+
+              Thank you for your order (Ref: ${data.reference}) with Gifts by EverythingZeedat 🎁.
+
+              I'd like to confirm a few details and share payment options with you, could we chat here on WhatsApp when you have a moment?
+              Looking forward to getting your gift ready! 💕
+
+~ <em>Zeedat<em> from <strong>Gifts by EverythingZeedat</strong></p>
             </div>
             <p style="margin-top: 20px; font-size: 12px; color: #666;">Reach out to confirm payment and delivery details.</p>
           </div>
