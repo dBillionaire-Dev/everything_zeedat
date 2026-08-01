@@ -212,6 +212,12 @@ export default function CustomOrderTrackingPage() {
         <div className="bg-[#f9f7f4] rounded-xl p-6 mb-8">
           <h3 className="font-serif font-semibold text-lg text-[#2a2a2a] mb-4">What You Asked For</h3>
           <p className="text-[#8b8b8b] whitespace-pre-wrap">{request.description}</p>
+          {request.delivery_address && (
+            <p className="text-[#8b8b8b] mt-3">
+              <span className="font-medium text-[#2a2a2a]">Delivery address:</span>{' '}
+              {request.delivery_address}, {request.city}, {request.state}
+            </p>
+          )}
           {request.preferred_delivery_date && (
             <p className="text-[#8b8b8b] mt-3">
               <span className="font-medium text-[#2a2a2a]">Preferred delivery date:</span>{' '}

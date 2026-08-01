@@ -1,16 +1,24 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Trash2, Plus, Minus, Heart } from 'lucide-react'
 import { useCart } from '@/lib/cart-context'
 import { useWishlist } from '@/lib/wishlist-context'
-import { DELIVERY_FEE } from '@/lib/constants'
+import { api } from '@/lib/api'
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, total } = useCart()
   const { toggle, isSaved } = useWishlist()
-  const deliveryFee = DELIVERY_FEE
+  const [deliveryFee, setDeliveryFee] = useState(2000)
   const grandTotal = total + deliveryFee
+
+  useEffect(() => {
+    api.siteSettings
+      .get()
+      .then(settings => setDeliveryFee(settings.default_delivery_fee))
+      .catch(err => console.error('Error loading delivery fee:', err))
+  }, [])
 
   return (
     <div className="min-h-screen bg-white">
@@ -133,7 +141,7 @@ export default function CartPage() {
                     <span>₦{(total / 1000).toFixed(0)}k</span>
                   </div>
                   <div className="flex justify-between text-[#8b8b8b]">
-                    <span>Delivery Fee</span>
+                    <span>Delivery Fee (estimated)</span>
                     <span>₦{(deliveryFee / 1000).toFixed(0)}k</span>
                   </div>
                 </div>

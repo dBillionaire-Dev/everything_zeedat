@@ -22,6 +22,9 @@ export async function POST(request: NextRequest) {
       customerName,
       customerEmail,
       customerPhone,
+      deliveryAddress,
+      city,
+      state,
       occasion,
       budgetRange,
       description,
@@ -29,8 +32,11 @@ export async function POST(request: NextRequest) {
       referenceImage,
     } = body;
 
-    // Validate required fields
-    if (!customerName || !customerEmail || !customerPhone || !occasion || !budgetRange || !description) {
+    // Validate required fields. Email is intentionally NOT required here --
+    // the form itself marks it optional (with a disclaimer that skipping it
+    // means no automatic updates), so the server must not reject a
+    // submission just because it's missing.
+    if (!customerName || !customerPhone || !deliveryAddress || !city || !state || !occasion || !budgetRange || !description) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -48,7 +54,10 @@ export async function POST(request: NextRequest) {
           reference: referenceId,
           customer_name: customerName,
           phone: customerPhone,
-          email: customerEmail,
+          email: customerEmail || null,
+          delivery_address: deliveryAddress,
+          city,
+          state,
           occasion,
           budget_range: budgetRange,
           description,
@@ -72,6 +81,9 @@ export async function POST(request: NextRequest) {
       customerName,
       customerEmail,
       customerPhone,
+      deliveryAddress,
+      city,
+      state,
       occasion,
       budgetRange,
       description,

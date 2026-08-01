@@ -36,6 +36,7 @@ export interface OrderItem {
   name_snapshot: string;
   unit_price_snapshot: number;
   quantity: number;
+  image_snapshot: string | null;
   customization_details: Record<string, any> | null;
   created_at: string;
 }
@@ -55,9 +56,10 @@ export interface Order {
   delivery_fee: number;
   total: number;
   status: 'RECEIVED' | 'CONFIRMED' | 'PREPARING' | 'OUT_FOR_DELIVERY' | 'DELIVERED' | 'CANCELLED';
-  payment_status: 'PENDING' | 'PAID' | 'FAILED';
+  payment_status: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
   payment_method: 'PAYSTACK' | 'WHATSAPP_MANUAL';
   paystack_reference: string | null;
+  refund_issued_at: string | null;
   created_at: string;
   updated_at: string;
   items?: Array<{ name: string; price: number; quantity: number; customization?: Record<string, string> }>;
@@ -72,6 +74,9 @@ export interface CustomOrderRequest {
   occasion: string;
   budget_range: 'under-10k' | '10k-25k' | '25k-50k' | '50k-plus';
   description: string;
+  delivery_address: string | null;
+  city: string | null;
+  state: string | null;
   reference_image_url: string | null;
   preferred_delivery_date: string | null;
   status: 'NEW' | 'REVIEWED' | 'QUOTED' | 'CONFIRMED' | 'PREPARING' | 'OUT_FOR_DELIVERY' | 'DELIVERED' | 'DECLINED';
@@ -102,6 +107,15 @@ export interface Review {
 export interface SiteSettings {
   id: string;
   reviews_submission_enabled: boolean;
+  default_delivery_fee: number;
+  updated_at: string;
+}
+
+export interface DeliveryZone {
+  id: string;
+  state: string;
+  fee: number;
+  created_at: string;
   updated_at: string;
 }
 
@@ -220,6 +234,7 @@ export const api = {
             name_snapshot: item.name,
             unit_price_snapshot: item.price,
             quantity: item.quantity,
+            image_snapshot: null,
             customization_details: item.customization || null,
           }))
         );
@@ -473,6 +488,63 @@ export const api = {
 
       if (error) throw error;
       return data as SiteSettings;
+    },
+
+    async setDefaultDeliveryFee(id: string, fee: number) {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('site_settings')
+        .update({ default_delivery_fee: fee, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as SiteSettings;
+    },
+  },
+
+  deliveryZones: {
+    async list() {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('delivery_zones')
+        .select('*')
+        .order('state', { ascending: true });
+
+      if (error) throw error;
+      return data as DeliveryZone[];
+    },
+
+    async create(zone: { state: string; fee: number }) {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('delivery_zones')
+        .insert([zone])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as DeliveryZone;
+    },
+
+    async update(id: string, updates: { state?: string; fee?: number }) {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('delivery_zones')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as DeliveryZone;
+    },
+
+    async remove(id: string) {
+      const supabase = createClient();
+      const { error } = await supabase.from('delivery_zones').delete().eq('id', id);
+      if (error) throw error;
     },
   },
 }

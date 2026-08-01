@@ -181,6 +181,15 @@ export default function AdminCustomOrdersPage() {
                     <p className="font-medium text-[#2a2a2a]">{selectedRequest.occasion}</p>
                   </div>
 
+                  {selectedRequest.delivery_address && (
+                    <div>
+                      <p className="text-xs text-[#8b8b8b] uppercase mb-1">Delivery Address</p>
+                      <p className="font-medium text-[#2a2a2a]">
+                        {selectedRequest.delivery_address}, {selectedRequest.city}, {selectedRequest.state}
+                      </p>
+                    </div>
+                  )}
+
                   <div>
                     <p className="text-xs text-[#8b8b8b] uppercase mb-1">Budget</p>
                     <p className="font-medium text-[#2a2a2a] capitalize">{selectedRequest.budget_range.replace('-', ' - ₦')}</p>
@@ -211,6 +220,20 @@ export default function AdminCustomOrdersPage() {
                       {selectedRequest.description}
                     </p>
                   </div>
+
+                  {selectedRequest.reference_image_url && (
+                    <div>
+                      <p className="text-xs text-[#8b8b8b] uppercase mb-1">Reference Image</p>
+                      <a href={selectedRequest.reference_image_url} target="_blank" rel="noopener noreferrer">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={selectedRequest.reference_image_url}
+                          alt="Customer-uploaded reference"
+                          className="w-full max-w-xs rounded-lg border border-[#e8dfd9] hover:opacity-90 transition-opacity"
+                        />
+                      </a>
+                    </div>
+                  )}
 
                   <div>
                     <p className="text-xs text-[#8b8b8b] uppercase mb-1">Admin Notes</p>

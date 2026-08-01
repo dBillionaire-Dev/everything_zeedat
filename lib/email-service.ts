@@ -14,6 +14,9 @@ export interface CustomOrderEmailData {
   customerName: string;
   customerEmail: string;
   customerPhone: string;
+  deliveryAddress?: string;
+  city?: string;
+  state?: string;
   occasion: string;
   budgetRange: string;
   description: string;
@@ -301,6 +304,12 @@ function generateEmailHTML(data: CustomOrderEmailData): string {
               <span class="snapshot-label">Budget Range:</span>
               <span class="snapshot-value">${budgetLabels[data.budgetRange] || data.budgetRange}</span>
             </div>
+            ${data.deliveryAddress ? `
+            <div class="snapshot-item">
+              <span class="snapshot-label">Delivery Address:</span>
+              <span class="snapshot-value">${data.deliveryAddress}, ${data.city}, ${data.state}</span>
+            </div>
+            ` : ''}
             ${data.preferredDeliveryDate ? `
             <div class="snapshot-item">
               <span class="snapshot-label">Preferred Delivery:</span>
@@ -401,6 +410,10 @@ export async function sendCustomOrderNotificationToAdmin(data: CustomOrderEmailD
             <div class="detail">
               <p class="label">WhatsApp:</p>
               <p><a href="https://wa.me/${data.customerPhone.replace(/\D/g, '')}">${data.customerPhone}</a></p>
+            </div>
+            <div class="detail">
+              <p class="label">Delivery Address:</p>
+              <p>${data.deliveryAddress || 'Not provided'}${data.city ? `, ${data.city}` : ''}${data.state ? `, ${data.state}` : ''}</p>
             </div>
             <div class="detail">
               <p class="label">Occasion:</p>
@@ -665,6 +678,7 @@ export interface OrderStatusUpdateEmailData {
   status: string;
   paymentStatus: string;
   paymentJustConfirmed?: boolean;
+  refundJustIssued?: boolean;
 }
 
 export async function sendOrderStatusUpdate(data: OrderStatusUpdateEmailData): Promise<boolean> {
@@ -707,6 +721,12 @@ export async function sendOrderStatusUpdate(data: OrderStatusUpdateEmailData): P
             ${
               data.paymentJustConfirmed
                 ? `<div class="payment-note">✅ We've also confirmed receipt of your payment for this order. Thank you!</div>`
+                : ''
+            }
+
+            ${
+              data.refundJustIssued
+                ? `<div class="payment-note">💸 We've issued a refund for this order. Please allow a few business days for it to reflect, depending on your bank.</div>`
                 : ''
             }
 

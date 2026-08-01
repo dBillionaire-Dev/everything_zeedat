@@ -155,9 +155,11 @@ export default function OrderTrackingPage() {
                   ? 'bg-green-100 text-green-800'
                   : order.payment_status === 'FAILED'
                   ? 'bg-red-100 text-red-800'
+                  : order.payment_status === 'REFUNDED'
+                  ? 'bg-blue-100 text-blue-800'
                   : 'bg-gray-100 text-gray-700'
               }`}>
-                {order.payment_status === 'PAID' ? '✓ Paid' : order.payment_status === 'FAILED' ? 'Failed' : 'Pending'}
+                {order.payment_status === 'PAID' ? '✓ Paid' : order.payment_status === 'FAILED' ? 'Failed' : order.payment_status === 'REFUNDED' ? '💸 Refunded' : 'Pending'}
               </span>
             </div>
             <div>

@@ -1,7 +1,6 @@
-// Flat delivery fee applied at checkout. Kept in one place so cart and
-// checkout can never show a different number from each other -- update
-// here if pricing changes.
-export const DELIVERY_FEE = 2000;
+// Delivery fee is no longer a flat constant -- it's admin-configurable via
+// the site_settings.default_delivery_fee + delivery_zones table (see
+// /admin/delivery-zones). Fetched at runtime in cart/checkout pages.
 
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://everythingzeedat.vercel.app';
 

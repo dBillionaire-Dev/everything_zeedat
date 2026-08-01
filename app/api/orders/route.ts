@@ -6,9 +6,11 @@ import { generateCustomerOrderWhatsAppLink, generateAdminOrderWhatsAppMessage } 
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
 interface OrderItemInput {
+  productId?: string;
   name: string;
   price: number;
   quantity: number;
+  image?: string;
   customization?: Record<string, string>;
 }
 
@@ -94,10 +96,11 @@ export async function POST(request: NextRequest) {
     const { error: itemsError } = await supabase.from('order_items').insert(
       items.map(item => ({
         order_id: order.id,
-        product_id: null,
+        product_id: item.productId || null,
         name_snapshot: item.name,
         unit_price_snapshot: item.price,
         quantity: item.quantity,
+        image_snapshot: item.image || null,
         customization_details: item.customization || null,
       }))
     );

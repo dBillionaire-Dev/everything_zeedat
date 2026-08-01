@@ -48,7 +48,12 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     const updates: Record<string, string> = { updated_at: new Date().toISOString() };
     if (status) updates.status = status;
-    if (payment_status) updates.payment_status = payment_status;
+    if (payment_status) {
+      updates.payment_status = payment_status;
+      if (payment_status === 'REFUNDED') {
+        updates.refund_issued_at = new Date().toISOString();
+      }
+    }
 
     const { data: order, error } = await supabase
       .from('orders')
@@ -68,6 +73,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         status: order.status,
         paymentStatus: order.payment_status,
         paymentJustConfirmed: Boolean(payment_status === 'PAID'),
+        refundJustIssued: Boolean(payment_status === 'REFUNDED'),
       }).catch(err => console.error('Order status email failed (non-fatal):', err));
     }
 
