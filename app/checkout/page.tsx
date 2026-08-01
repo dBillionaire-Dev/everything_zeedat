@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { AlertCircle, MessageCircle, PackageCheck } from 'lucide-react'
 import { useCart } from '@/lib/cart-context'
 import { useActiveOrders } from '@/lib/active-orders-context'
-import { DELIVERY_FEE } from '@/lib/constants'
+import { api } from '@/lib/api'
+import type { DeliveryZone } from '@/lib/api'
 
 export default function CheckoutPage() {
   const { items, total, clear } = useCart()
@@ -14,8 +15,17 @@ export default function CheckoutPage() {
   const [error, setError] = useState('')
   const [orderResult, setOrderResult] = useState<{ reference: string; whatsappLink: string } | null>(null)
 
-  const deliveryFee = DELIVERY_FEE
-  const grandTotal = total + deliveryFee
+  const [defaultDeliveryFee, setDefaultDeliveryFee] = useState(2000)
+  const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([])
+
+  useEffect(() => {
+    Promise.all([api.siteSettings.get(), api.deliveryZones.list()])
+      .then(([settings, zones]) => {
+        setDefaultDeliveryFee(settings.default_delivery_fee)
+        setDeliveryZones(zones)
+      })
+      .catch(err => console.error('Error loading delivery pricing:', err))
+  }, [])
 
   const [formData, setFormData] = useState({
     customerName: '',
@@ -27,6 +37,12 @@ export default function CheckoutPage() {
     deliveryDate: '',
     notes: '',
   })
+
+  const matchedZone = deliveryZones.find(
+    z => z.state.trim().toLowerCase() === formData.state.trim().toLowerCase()
+  )
+  const deliveryFee = matchedZone ? matchedZone.fee : defaultDeliveryFee
+  const grandTotal = total + deliveryFee
 
   if (items.length === 0 && !orderResult) {
     return (
@@ -66,9 +82,11 @@ export default function CheckoutPage() {
           deliveryFee,
           total: grandTotal,
           items: items.map(item => ({
+            productId: item.productId,
             name: item.name,
             price: item.price,
             quantity: item.quantity,
+            image: item.image,
             customization: item.customization,
           })),
         }),

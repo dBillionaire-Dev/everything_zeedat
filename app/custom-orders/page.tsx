@@ -18,6 +18,9 @@ export default function CustomOrdersPage() {
     customerName: '',
     phone: '',
     email: '',
+    deliveryAddress: '',
+    city: '',
+    state: '',
     occasion: '',
     budgetRange: 'under-10k' as const,
     description: '',
@@ -85,6 +88,9 @@ export default function CustomOrdersPage() {
           customerName: formData.customerName,
           customerPhone: formData.phone,
           customerEmail: formData.email,
+          deliveryAddress: formData.deliveryAddress,
+          city: formData.city,
+          state: formData.state,
           occasion: formData.occasion,
           budgetRange: formData.budgetRange,
           description: formData.description,
@@ -255,6 +261,44 @@ export default function CustomOrdersPage() {
                   💌 Add your email so we can send you a confirmation and keep you posted as we review your request.
                   Without it, we can only reach you on WhatsApp.
                 </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Delivery Info */}
+          <div className="bg-[#f9f7f4] rounded-xl p-6">
+            <h3 className="font-serif font-semibold text-lg text-[#2a2a2a] mb-4">
+              Delivery Information
+            </h3>
+            <div className="space-y-4">
+              <textarea
+                name="deliveryAddress"
+                placeholder="Delivery Address"
+                value={formData.deliveryAddress}
+                onChange={handleInputChange}
+                required
+                rows={3}
+                className="w-full px-4 py-2 border border-[#e8dfd9] rounded-lg focus:outline-none focus:border-[#d4a5a5] resize-none"
+              />
+              <div className="grid sm:grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  name="city"
+                  placeholder="City"
+                  value={formData.city}
+                  onChange={handleInputChange}
+                  required
+                  className="px-4 py-2 border border-[#e8dfd9] rounded-lg focus:outline-none focus:border-[#d4a5a5]"
+                />
+                <input
+                  type="text"
+                  name="state"
+                  placeholder="State/Region"
+                  value={formData.state}
+                  onChange={handleInputChange}
+                  required
+                  className="px-4 py-2 border border-[#e8dfd9] rounded-lg focus:outline-none focus:border-[#d4a5a5]"
+                />
               </div>
             </div>
           </div>
