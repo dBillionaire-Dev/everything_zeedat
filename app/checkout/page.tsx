@@ -116,7 +116,7 @@ export default function CheckoutPage() {
         <p className="text-[#8b8b8b] mb-1">Your reference number is</p>
         <p className="font-mono font-bold text-xl text-[#2a2a2a] mb-6">{orderResult.reference}</p>
         <p className="text-[#8b8b8b] max-w-md mb-8">
-          The last step is confirming your order and payment directly with Zeedat on WhatsApp — she'll take it
+          The last step is confirming your order and payment directly with Zeedat on WhatsApp, she'll take it
           from here.
         </p>
 

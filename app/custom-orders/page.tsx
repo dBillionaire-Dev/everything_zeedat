@@ -400,7 +400,7 @@ export default function CustomOrdersPage() {
                 {imageError && (
                   <p className="text-sm text-[#ef4444] mt-2">{imageError}</p>
                 )}
-                <p className="text-xs text-[#8b8b8b] mt-2">JPG, PNG, WEBP, or HEIC — up to 5MB</p>
+                <p className="text-xs text-[#8b8b8b] mt-2">JPG, PNG, WEBP, or HEIC up to 5MB</p>
               </div>
             </div>
           </div>
