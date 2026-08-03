@@ -117,7 +117,7 @@ export async function sendCustomOrderStatusUpdate(data: CustomOrderStatusUpdateE
                 : `
                 <div style="text-align: center; margin: 25px 0;">
                   <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-                    `Hi Zeedat, following up on my custom order request — Reference: ${data.referenceId}`
+                    `Hi Zeedat, following up on my custom order request - Reference: ${data.referenceId}`
                   )}" class="cta-button">
                     💬 Message Us on WhatsApp
                   </a>
@@ -135,7 +135,8 @@ export async function sendCustomOrderStatusUpdate(data: CustomOrderStatusUpdateE
     `;
 
     await transporter.sendMail({
-      from: process.env.GMAIL_EMAIL,
+      from: `"Gifts by EverythingZeedat" <${process.env.GMAIL_EMAIL}>`,
+      replyTo: process.env.GMAIL_EMAIL,
       to: data.customerEmail,
       subject: `Custom Order Update: ${statusInfo.label} - Reference: ${data.referenceId}`,
       html,
@@ -358,7 +359,8 @@ export async function sendCustomOrderConfirmation(data: CustomOrderEmailData): P
   try {
     // Send email to customer
     await transporter.sendMail({
-      from: process.env.GMAIL_EMAIL,
+      from: `"Gifts by EverythingZeedat" <${process.env.GMAIL_EMAIL}>`,
+      replyTo: process.env.GMAIL_EMAIL,
       to: data.customerEmail,
       subject: `Custom Gift Request Received - Reference: ${data.referenceId}`,
       html: generateEmailHTML(data),
@@ -453,7 +455,8 @@ export async function sendCustomOrderNotificationToAdmin(data: CustomOrderEmailD
     `;
 
     await transporter.sendMail({
-      from: process.env.GMAIL_EMAIL,
+      from: `"Gifts by EverythingZeedat" <${process.env.GMAIL_EMAIL}>`,
+      replyTo: adminEmail,
       to: adminEmail,
       subject: `[ADMIN] New Custom Order: ${data.customerName} - ${data.referenceId}`,
       html: adminEmailHTML,
@@ -573,7 +576,8 @@ export async function sendOrderConfirmation(data: OrderEmailData): Promise<boole
     `;
 
     await transporter.sendMail({
-      from: process.env.GMAIL_EMAIL,
+      from: `"Gifts by EverythingZeedat" <${process.env.GMAIL_EMAIL}>`,
+      replyTo: process.env.GMAIL_EMAIL,
       to: data.customerEmail,
       subject: `Order Received - Reference: ${data.reference}`,
       html,
@@ -643,7 +647,7 @@ export async function sendOrderNotificationToAdmin(data: OrderEmailData): Promis
     `;
 
     await transporter.sendMail({
-      from: process.env.GMAIL_EMAIL,
+      from: `"Gifts by EverythingZeedat" <${process.env.GMAIL_EMAIL}>`,
       to: adminEmail,
       subject: `[ADMIN] New Order: ${data.customerName} - ${data.reference}`,
       html,
@@ -771,10 +775,18 @@ export async function sendOrderStatusUpdate(data: OrderStatusUpdateEmailData): P
       </html>
     `;
 
+    // await transporter.sendMail({
+    //   from: process.env.GMAIL_EMAIL,
+    //   to: data.customerEmail,
+    //   subject: `Order Update: ${statusInfo.label} - Reference: ${data.reference}`,
+    //   html,
+    // });
+
     await transporter.sendMail({
-      from: process.env.GMAIL_EMAIL,
+      from: `"Gifts by EverythingZeedat" <${process.env.GMAIL_EMAIL}>`,
+      replyTo: process.env.GMAIL_EMAIL,
       to: data.customerEmail,
-      subject: `Order Update: ${statusInfo.label} - Reference: ${data.reference}`,
+      subject: `Order Update:  ${statusInfo.label} - Reference: ${data.reference}`,
       html,
     });
 
